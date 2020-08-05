@@ -4,6 +4,11 @@ import {AuctionListComponent} from './auction-list/auction-list.component';
 
 const routes: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: '/auctions'
+  },
+  {
     path: 'auctions',
     component: AuctionListComponent
   }
