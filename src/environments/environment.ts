@@ -2,10 +2,17 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-export const environment = {
-  production: false
-};
+import {Environment} from './environment.model';
 
+export const environment: Environment = {
+  production: false,
+  useMockBackend: true,
+  version: '_VERSION_',
+  endpoints: {
+    backendBaseUrl: 'http://unused/api',
+    backendAuthUrl: 'http://unused/api'
+  }
+};
 /*
  * For easier debugging in development mode, you can import the following file
  * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
