@@ -1,0 +1,19 @@
+.abs-center-x {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.navbar-nav > li {
+  float: left;
+  position: relative;
+}
+
+
+.navbar-nav li {
+  box-sizing: border-box;
+  height: 30px;
+  border-left: 1px solid #007bff;
+  a:hover { background-color: #338bff !important; }
+
+}

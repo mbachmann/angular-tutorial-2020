@@ -9,6 +9,8 @@ import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import { AuctionListDetailComponent } from './auction-list-detail/auction-list-detail.component';
 import {AngularDateHttpInterceptorService} from './shared/angular-date-http-interceptor.service';
 import { AuctionDetailComponent } from './auction-detail/auction-detail.component';
+import { HomeComponent } from './home/home.component';
+import { NavBarComponent } from './nav-bar/nav-bar.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +18,9 @@ import { AuctionDetailComponent } from './auction-detail/auction-detail.componen
     AuctionListComponent,
     MouseEventDisplayComponent,
     AuctionListDetailComponent,
-    AuctionDetailComponent
+    AuctionDetailComponent,
+    HomeComponent,
+    NavBarComponent
   ],
   imports: [
     BrowserModule,
