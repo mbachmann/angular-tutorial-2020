@@ -5,7 +5,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AuctionListComponent } from './auction-list/auction-list.component';
 import { MouseEventDisplayComponent } from './mouse-event-display/mouse-event-display.component';
-import { AuctionDataService } from './shared/auction-data.service';
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import { AuctionListDetailComponent } from './auction-list-detail/auction-list-detail.component';
 import {AngularDateHttpInterceptorService} from './shared/angular-date-http-interceptor.service';
