@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Auction } from './auction';
 import { AUCTION_DATA } from './auction-data';
-import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+
 
 @Injectable({
   providedIn: 'root'
