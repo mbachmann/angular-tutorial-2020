@@ -28,7 +28,7 @@ Go to the the **[tutorial](https://github.zhaw.ch/bacn/ase2-angular-education-20
 Here is the [typescript](https://github.zhaw.ch/bacn/ase2-typescript-01) tutorial
 
 
-# Step by step Tutorial for an Auction App with Angular
+# Step by step [Tutorial](https://github.zhaw.ch/bacn/ase2-angular-education-2020/wiki) for an Auction App with Angular
 
 The result of this [tutorial](https://github.zhaw.ch/bacn/ase2-angular-education-2020/wiki) is a list and a detail view of an auction app. The data is loaded from a test-api-backend.
 
@@ -42,7 +42,7 @@ The detail view with _place bid_ and _buy now_.
 
 ![auction-detail-view-02.png](https://github.zhaw.ch/bacn/ase2-angular-education-2020/raw/master/assets/auction-detail-view-02.png)
 
-## Content of the [Wiki](https://github.zhaw.ch/bacn/ase2-angular-education-2020/wiki)
+## Content of the [Tutorial](https://github.zhaw.ch/bacn/ase2-angular-education-2020/wiki)
 
 The [wiki](https://github.zhaw.ch/bacn/ase2-angular-education-2020/wiki) of this repository contains the tasks and hints of the Angular introduction lectures. The tasks allow exercising the theorie described in the slide desk. The result of each step can be analyzed in the source code by using the branches `git checkout -b <branch>`. Each result of an individual task is available in this code repository.
 
