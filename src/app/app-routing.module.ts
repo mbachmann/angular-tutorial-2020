@@ -3,7 +3,10 @@ import { Routes, RouterModule } from '@angular/router';
 import {AuctionListComponent} from './auction-list/auction-list.component';
 
 const routes: Routes = [
-
+  {
+    path: 'auctions',
+    component: AuctionListComponent
+  }
 ];
 
 @NgModule({
