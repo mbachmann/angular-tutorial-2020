@@ -1,7 +1,10 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import {AuctionListComponent} from './auction-list/auction-list.component';
 
-const routes: Routes = [];
+const routes: Routes = [
+
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
