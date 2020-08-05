@@ -1,1 +1,30 @@
-<p>auction-detail works!</p>
+<div *ngIf="auction" class="container top bottom" (click)="onContainerClick()" >
+
+  <div class="row ">
+    <!-- Image  ---------------------------------------------------------------- -->
+    <div class="col-sm-7" align="center">
+      <img class="auction-image" src="assets/{{auction.auctionItem.picture}}"/>
+    </div>
+
+    <!-- Right column  ---------------------------------------------------------- -->
+    <div class="col-sm-5">
+      <!-- Title  --------------------------------------------------------------- -->
+
+      <div class="row">
+        <div class="col col-nolr-padding">
+          <p class=" top-line title"><b>{{auction.auctionItem.title}}</b></p>
+          <p class="text">{{auction.auctionItem.description}}</p><br/>
+        </div>
+      </div>
+
+      <!-- End Date ------------------------------------------------------------- -->
+      <div class="row top">
+        <div class="col">
+          <p class="text-date"> <i class="fa fa-calendar"></i> {{" " + auction.endDateTime}}</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
