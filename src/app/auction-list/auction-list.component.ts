@@ -23,7 +23,7 @@ export class AuctionListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.auctionsObservable = this.auctionDataService.getObservableAuctions();
+    this.auctionsObservable = this.auctionDataService.getHttpAuctions();
     this.auctionSubscription = this.auctionsObservable.subscribe(data => this.auctions = data);
   }
 

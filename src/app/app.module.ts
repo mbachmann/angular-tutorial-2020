@@ -6,8 +6,9 @@ import { AppComponent } from './app.component';
 import { AuctionListComponent } from './auction-list/auction-list.component';
 import { MouseEventDisplayComponent } from './mouse-event-display/mouse-event-display.component';
 import { AuctionDataService } from './shared/auction-data.service';
-import {HttpClientModule} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import { AuctionListDetailComponent } from './auction-list-detail/auction-list-detail.component';
+import {AngularDateHttpInterceptorService} from './shared/angular-date-http-interceptor.service';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,13 @@ import { AuctionListDetailComponent } from './auction-list-detail/auction-list-d
     AppRoutingModule,
     HttpClientModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AngularDateHttpInterceptorService,
+      multi: true
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
