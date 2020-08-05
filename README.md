@@ -8,7 +8,7 @@
 
 [https://github.zhaw.ch/bacn/ase2-angular-education-2020](https://github.zhaw.ch/bacn/ase2-angular-education-2020)
 
-> An Angular full stack starter kit featuring [Angular](https://angular.io), [Router](https://angular.io/docs/ts/latest/guide/router.html), [Forms](https://angular.io/docs/ts/latest/guide/forms.html),
+> An tutorial featuring [Angular](https://angular.io), [Router](https://angular.io/docs/ts/latest/guide/router.html), [Forms](https://angular.io/docs/ts/latest/guide/forms.html),
 [Http](https://angular.io/docs/ts/latest/guide/server-communication.html),
 [JSON Web Token](https://jwt.io/)
 
