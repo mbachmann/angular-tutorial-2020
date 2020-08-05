@@ -1,0 +1,34 @@
+<div class="container top">
+
+  <div class="row ">
+    <div class="col" align="center">
+      <img class="auction-image" src="assets/{{auction.auctionItem.picture}}"/>
+    </div>
+    <div class="col">
+      <p class="title"><b>{{auction.auctionItem.title}}</b></p>
+      <p class="text">{{auction.auctionItem.description}}</p>
+    </div>
+    <div class="col" align="right">
+      <span *ngIf="auction.startingPrice > 0">
+        <p class="text">{{auction.bids.length + " "}} bids<br/>
+          <b class="text-auction-price">{{getCurrencyString() + " " + getAmount().toFixed(2)}}</b>
+        </p>
+      </span>
+      <span *ngIf="auction.fixedPrice > 0">
+        <p class="text" >
+          buy now  <br/>
+          <b class="text-fixed-price">{{getCurrencyString() + " " + auction.fixedPrice.toFixed(2)}}</b>
+        </p>
+      </span>
+
+    </div>
+
+  </div>
+  <div class="row ">
+    <div class="col">
+      <p class="text-date"> <i class="fa fa-calendar"></i> {{" " + getLocalDate(auction.endDateTime)}}</p>
+
+    </div>
+
+  </div>
+</div>
