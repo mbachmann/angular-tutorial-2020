@@ -1,6 +1,16 @@
+[![Maintenance Status][status-image]][status-url]
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.zhaw.ch/bacn/ase2-angular-education-2020/blob/master/LICENSE)
+[![StackShare](https://img.shields.io/badge/tech-stack-0690fa.svg?style=flat)](https://stackshare.io/mbachmann/ase-angular-education)
+
+
+
 # Ase Angular Education 2020
 
 [https://github.zhaw.ch/bacn/ase2-angular-education-2020](https://github.zhaw.ch/bacn/ase2-angular-education-2020)
+
+> An Angular full stack starter kit featuring [Angular](https://angular.io), [Router](https://angular.io/docs/ts/latest/guide/router.html), [Forms](https://angular.io/docs/ts/latest/guide/forms.html),
+[Http](https://angular.io/docs/ts/latest/guide/server-communication.html),
+[JSON Web Token](https://jwt.io/)
 
 Go to the the **[tutorial](https://github.zhaw.ch/bacn/ase2-angular-education-2020/wiki)**
 
@@ -88,6 +98,17 @@ The [wiki](https://github.zhaw.ch/bacn/ase2-angular-education-2020/wiki) of this
 
 * **Task#25** Create an _authentication service_.
 
+* **Task#27** Build a simple login dialog
+
+* **Task#28** Build a registration dialog
+
+* **Task#29** build a JWT interceptor
+
+* **Task#30** Access a protected resource
+
+* **Task#31** Build a simple can activate guard
+
+
 ## Project information
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.3.6.
@@ -120,3 +141,6 @@ Before running the tests make sure you are serving the app via `ng serve`.
 ### Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+
+[status-url]: https://github.com/bfwg/angular-spring-jwt-starter
+[status-image]: https://img.shields.io/badge/status-maintained-brightgreen.svg
