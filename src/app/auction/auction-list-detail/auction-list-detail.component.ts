@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Auction} from '../shared/auction';
-import {CURRENCY_STRING} from '../app.constants';
+import {CURRENCY_STRING} from '../../app.constants';
 import {Router} from '@angular/router';
 
 @Component({

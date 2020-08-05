@@ -1,39 +1,30 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
-import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AuctionListComponent } from './auction-list/auction-list.component';
-import { MouseEventDisplayComponent } from './mouse-event-display/mouse-event-display.component';
-import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
-import { AuctionListDetailComponent } from './auction-list-detail/auction-list-detail.component';
-import {AngularDateHttpInterceptorService} from './shared/angular-date-http-interceptor.service';
-import { AuctionDetailComponent } from './auction-detail/auction-detail.component';
-import { HomeComponent } from './home/home.component';
+import { FormsModule } from '@angular/forms';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { AngularDateHttpInterceptorService } from './shared/angular-date-http-interceptor.service';
+
 import { NavBarComponent } from './nav-bar/nav-bar.component';
+import { HomeComponent } from './home/home.component';
+import {AppRoutingModule} from './app-routing.module';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    AuctionListComponent,
-    MouseEventDisplayComponent,
-    AuctionListDetailComponent,
-    AuctionDetailComponent,
-    HomeComponent,
-    NavBarComponent
-  ],
+  declarations: [AppComponent, NavBarComponent, HomeComponent],
   imports: [
     BrowserModule,
-    AppRoutingModule,
-    HttpClientModule
+    FormsModule,
+    HttpClientModule,
+    AppRoutingModule
   ],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AngularDateHttpInterceptorService,
       multi: true
-    }
+    },
   ],
+
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}
