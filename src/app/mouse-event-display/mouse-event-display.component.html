@@ -1,0 +1,16 @@
+<h1 class="title">Mouse Events</h1>
+
+<div class="box"
+     (mouseenter)="onEvent($event)"
+     (mouseleave)="onEvent($event)"
+     (mousemove)="coordinates($event)"
+     (click)="onEvent($event)"
+     (dblclick)="onEvent($event)"
+     on-contextmenu="onEvent($event)">
+  <!-- (event)="" or  on-event="" -->
+
+  <p class="type">Type: {{event?.type}}</p>
+  <p>x: {{clientX}}, y: {{clientY}}</p>
+  <p>ctrl: {{event?.ctrlKey}}, shift: {{event?.shiftKey}}, meta: {{event?.metaKey}}</p>
+</div>
+
