@@ -10,7 +10,7 @@ export class AppComponent {
   title: String = 'app works!';
   auctionListTitle = 'this is an auction list (from variable)';
 
-  onAuctionListTitleClicked(event: Event): void {
+  onAuctionListTitleClicked(event: string): void {
     console.log(event);
   }
 }
