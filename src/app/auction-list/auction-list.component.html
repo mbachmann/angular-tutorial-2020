@@ -1,3 +1,9 @@
 <p>auction-list works!</p>
 <h3 (click)="onTitleClicked($event)">{{headerTitle}}</h3>
 <app-mouse-event-display></app-mouse-event-display>
+<div
+  *ngFor="let auction of auctions; let isOdd=odd; ">
+  <div c>
+    <p [class.highlight]="isOdd">{{auction.title}}</p>
+  </div>
+</div>

@@ -12,7 +12,13 @@ export class AuctionListComponent implements OnInit {
   @Output() titleClicked = new EventEmitter<string>();
   ngOnInit(): void {
   }
-
+  auctions = [
+    {title: 'bike'},
+    {title: 'iPhone'},
+    {title: 'watch'},
+    {title: 'table'},
+    {title: 'boat'}
+  ];
   onTitleClicked(event: MouseEvent): void {
     this.titleClicked.emit('Title clicked');
   }
