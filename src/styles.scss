@@ -2,3 +2,16 @@
 @import 'variables';
 @import '~bootstrap/scss/bootstrap';
 @import '~font-awesome/css/font-awesome.css';
+$font-stack:    Helvetica, sans-serif;
+$primary-color: #333;
+
+body {
+  font: 80% $font-stack;
+  color: $primary-color;
+}
+
+h4, .h4 {
+  font-size: 0.8 * $h4-font-size;
+  color: $primary-color;
+}
+

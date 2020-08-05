@@ -19,11 +19,61 @@
 
       <!-- End Date ------------------------------------------------------------- -->
       <div class="row top">
+        <div class="col col-nolr-padding">
+          <p class="text">Time left: {{" " + computeTimeLeft()}}</p>
+        </div>
         <div class="col">
-          <p class="text-date"> <i class="fa fa-calendar"></i> {{" " + auction.endDateTime}}</p>
+          <p class="text-date"> <i class="fa fa-calendar"></i> {{" " + getLocalDate(auction.endDateTime)}}</p>
         </div>
       </div>
 
+      <!-- Bid ----------------------------------------------------------------- -->
+      <div class="row row-bg-color top"  *ngIf="auction.startingPrice > 0 && isAuctionActive()">
+
+        <div class="col ">
+          <p class="text">latest bid</p>
+          <p class="text-auction-price">
+            <b class="text-auction-price">{{getCurrencyString() + " " + getAmount().toFixed(2) }}</b>
+          </p>
+        </div>
+
+        <div class="col ">
+          <p class="text">Your bid </p>
+          <input (focusin)="onFocusInBid()" (focusout)="onFocusOutBid()" class="form-control  text-right" type="number" min={{getBidAmount()}} value={{getBidAmount()}} id="yourbid" >
+          <p *ngIf="isFocusBid" style="padding-top:5px">Enter {{getCurrencyString() + " " + getBidAmount().toFixed(2)}} or more.
+            The smallest increment is {{getCurrencyString() + " " + auction.minBidIncrement.toFixed(2)}}</p>
+        </div>
+
+      </div>
+
+      <div class="row row-bg-color" *ngIf="auction.startingPrice > 0  && isAuctionActive()">
+
+        <div class="col" style="padding-top:10px">
+          <button class="btn btn-primary btn-block" style="background-color:orangered; border:0px solid orangered;">Place bid</button>
+        </div>
+
+      </div>
+
+      <!-- Buy now ------------------------------------------------------------------- -->
+      <div class="row row-bg-color" *ngIf="auction.fixedPrice > 0  && isAuctionActive()">
+
+        <div class="col" style="padding-top:10px">
+          <p class="text">buy now</p>
+          <p class="text">
+            <b class="text-fixed-price">{{getCurrencyString() + " " + auction.fixedPrice.toFixed(2)}}</b>
+          </p>
+        </div>
+
+      </div>
+
+      <div class="row row-bg-color bottom" *ngIf="auction.fixedPrice > 0 && isAuctionActive()">
+
+        <div class="col">
+          <button class="btn btn-primary btn-block"  style="background-color:yellowgreen; border:0px solid yellowgreen;"
+          >Buy now</button>
+        </div>
+
+      </div>
     </div>
   </div>
 
