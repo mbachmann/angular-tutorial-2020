@@ -8,13 +8,15 @@ import { MouseEventDisplayComponent } from './mouse-event-display/mouse-event-di
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import { AuctionListDetailComponent } from './auction-list-detail/auction-list-detail.component';
 import {AngularDateHttpInterceptorService} from './shared/angular-date-http-interceptor.service';
+import { AuctionDetailComponent } from './auction-detail/auction-detail.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     AuctionListComponent,
     MouseEventDisplayComponent,
-    AuctionListDetailComponent
+    AuctionListDetailComponent,
+    AuctionDetailComponent
   ],
   imports: [
     BrowserModule,

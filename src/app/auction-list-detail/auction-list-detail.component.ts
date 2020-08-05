@@ -1,6 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {Auction} from '../shared/auction';
 import {CURRENCY_STRING} from '../app.constants';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-auction-list-detail',
@@ -9,8 +10,11 @@ import {CURRENCY_STRING} from '../app.constants';
 })
 export class AuctionListDetailComponent implements OnInit {
   @Input() auction: Auction;
-  constructor() { }
+  constructor(private router: Router) { }
 
+  onContainerClick() {
+    this.router.navigate(['/auctions/' + this.auction.id]);
+  }
   ngOnInit() {
   }
 
