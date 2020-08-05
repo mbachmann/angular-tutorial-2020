@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +6,11 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'ase2-angular-education-y2020';
+
+  title: String = 'app works!';
+  auctionListTitle = 'this is an auction list (from variable)';
+
+  onAuctionListTitleClicked(event: Event): void {
+    console.log(event);
+  }
 }
