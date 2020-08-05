@@ -1,7 +1,8 @@
-import {Component, Input, OnInit, Output, EventEmitter} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {Auction} from '../shared/auction';
-import {AUCTION_DATA} from '../shared/auction-data';
 import {AuctionDataService} from '../shared/auction-data.service';
+import {Observable} from 'rxjs';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-auction-list',
@@ -13,15 +14,20 @@ export class AuctionListComponent implements OnInit {
   @Output() titleClicked = new EventEmitter<string>();
 
   auctions: Auction[];
+  auctionsObservable: Observable<Auction[]>;
+  auctionSubscription: Subscription;
 
   constructor(private auctionDataService: AuctionDataService) {
-    this.auctions = auctionDataService.getAuctions();
+    // this.auctions = auctionDataService.getAuctions();
+    this.auctionsObservable = auctionDataService.getObservableAuctions();
+    this.auctionSubscription = this.auctionsObservable.subscribe(data => this.auctions = data);
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
   }
 
   onTitleClicked(event: MouseEvent): void {
-    this.titleClicked.emit('Title clicked');
+    this.titleClicked.emit('Title clicked' + event.type);
   }
+
 }
