@@ -2,7 +2,7 @@
 
 [https://github.zhaw.ch/bacn/ase2-angular-education-2020](https://github.zhaw.ch/bacn/ase2-angular-education-2020)
 
-Go to the the [wiki](https://github.zhaw.ch/bacn/ase2-angular-education-2020/wiki)
+Go to the the **[tutorial]**(https://github.zhaw.ch/bacn/ase2-angular-education-2020/wiki)
 
 ## Learning targets
 
@@ -20,7 +20,10 @@ Here is the [typescript](https://github.zhaw.ch/bacn/ase2-typescript-01) tutoria
 
 # Step by step Tutorial for an Auction App with Angular
 
-The result of this tutorial is a list and a detail view of an auction app. The data is loaded from a test-api-backend.
+The result of this **[tutorial]**(https://github.zhaw.ch/bacn/ase2-angular-education-2020/wiki) is a list and a detail view of an auction app. The data is loaded from a test-api-backend.
+
+Go to the the **[tutorial]**(https://github.zhaw.ch/bacn/ase2-angular-education-2020/wiki)
+
 
 ![auction-list-view.png](https://github.zhaw.ch/bacn/ase2-angular-education-2020/raw/master/assets/auction-list-view.png)
 
