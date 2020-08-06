@@ -22,6 +22,12 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
+            "allowedCommonJsDependencies": [
+              "uuid",
+              "node-forge",
+              "buffer",
+              "crypto-js"
+            ],
             "aot": true,
             "assets": [
               "src/favicon.ico",

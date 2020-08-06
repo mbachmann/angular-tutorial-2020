@@ -5,22 +5,40 @@ import {
   HttpHandler,
   HttpEvent,
   HttpInterceptor,
-  HTTP_INTERCEPTORS
+  HTTP_INTERCEPTORS, HttpHeaders
 } from '@angular/common/http';
-import {Observable, of, Subscription, throwError} from 'rxjs';
-import {delay, mergeMap, materialize, dematerialize, first, tap} from 'rxjs/operators';
+import {Observable, of, throwError} from 'rxjs';
+import {delay, mergeMap, materialize, dematerialize, tap} from 'rxjs/operators';
 import {AUCTION_DATA} from '../../../auction/shared/auction-data';
+import {createRsaJwtToken, verifyRsaJwtToken} from './jwt-backend.data';
+import {decodeToken, IJwtStdPayload, Jwt} from '../helper.jwt';
 
-
+/**
+ * The mock backend interceptor is used to simulate a backend. The interceptor allows
+ * to write individual route functions in order to support all different http verbs (GET, POST, PUT, GET)
+ * The interceptor simulated a backend delay of 500ms. The traffic to the interceptor
+ * is visible in the console of the browser.
+ *
+ * At the end of this file you will find a method mockBackendProvider which can be used in the module provider
+ * to activate the interceptor
+ *
+ * Based on: https://jasonwatmore.com/post/2019/05/02/angular-7-mock-backend-example-for-backendless-development
+ *
+ */
 @Injectable()
 export class MockBackendInterceptor implements HttpInterceptor {
 
+  /**
+   * Overwritten method of HttpInterceptor
+   * @param request
+   * @param next
+   */
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const {url, method, headers, body} = request;
     // wrap in delayed observable to simulate server api call
     return of(null)
       .pipe(mergeMap(() => handleRoute()))
-      .pipe(materialize()) // call materialize and dematerialize to ensure delay even if an error is thrown (https://github.com/Reactive-Extensions/RxJS/issues/648)
+      .pipe(materialize()) // call materialize and dematerialize to ensure delay
       .pipe(delay(500))
       .pipe(dematerialize())
       .pipe(tap({
@@ -33,6 +51,10 @@ export class MockBackendInterceptor implements HttpInterceptor {
         complete: () => console.log('mockResponse: on complete')
       }));
 
+    /**
+     * The handle route function is used to individually support the
+     * different end points
+     */
     function handleRoute() {
       console.log('mockRequest: ' + url, method, headers, body);
       let response: Observable<HttpEvent<any>>;
@@ -71,11 +93,9 @@ export class MockBackendInterceptor implements HttpInterceptor {
           response = next.handle(request);
       }
       return response;
-
     }
 
-
-    // route functions
+    // --- route functions ---
 
     function authenticate() {
       const {username, password} = body;
@@ -84,20 +104,24 @@ export class MockBackendInterceptor implements HttpInterceptor {
       if (!user) {
         return error('Username or password is incorrect');
       } else {
+        const token = createToken(user.username);
+        let headers: HttpHeaders = new HttpHeaders();
+        headers = addTokenToHeader(headers, token);
+        headers = addAcceptToHeader(headers);
+        headers = addContentTypeToHeader(headers);
         return ok({
           id: user.id,
           username: user.username,
           firstName: user.firstName,
-          lastName: user.lastName,
-          token: 'fake-jwt-token'
-        });
+          lastName: user.lastName
+        }, headers);
       }
     }
 
     function register() {
       const user = body;
       let users = JSON.parse(localStorage.getItem('users')) || [];
-      console.log(users);
+      // console.log(users);
       if (users.find(x => x.username === user.username)) {
         return error('Username "' + user.username + '" is already taken')
       }
@@ -107,10 +131,14 @@ export class MockBackendInterceptor implements HttpInterceptor {
       users.push(user);
       localStorage.setItem('users', JSON.stringify(users));
 
-      return ok();
+      return ok(user);
     }
 
     function getUsers() {
+      if (!isLoggedIn()) return unauthorized();
+      if (!isTokenExpired()) return expired();
+      if (!isInRole('admin')) return notInRole();
+
       let users = JSON.parse(localStorage.getItem('users')) || [];
       if (!isLoggedIn()) return unauthorized();
       return ok(users);
@@ -159,8 +187,9 @@ export class MockBackendInterceptor implements HttpInterceptor {
 
     // helper functions
 
-    function ok(body?) {
-      return of(new HttpResponse({status: 200, body}))
+    function ok(body?, headers?: HttpHeaders) {
+      const resp = new HttpResponse({body: body, headers: headers, status: 200});
+      return of(new HttpResponse(resp));
     }
 
     function error(message) {
@@ -169,6 +198,14 @@ export class MockBackendInterceptor implements HttpInterceptor {
 
     function unauthorized() {
       return throwError({status: 401, error: {message: 'Unauthorised'}});
+    }
+
+    function expired() {
+      return throwError({status: 401, error: {message: 'Unauthorised - Token expired'}});
+    }
+
+    function notInRole() {
+      return throwError({status: 403, error: {message: 'Forbidden - not correct role'}});
     }
 
     function notFound() {
@@ -181,7 +218,44 @@ export class MockBackendInterceptor implements HttpInterceptor {
 
 
     function isLoggedIn() {
-      return headers.get('Authorization') === 'Bearer fake-jwt-token';
+      const bearerToken = headers.get('Authorization');
+      if (bearerToken && bearerToken.slice(0, 7) === 'Bearer ') {
+        const jwtToken = bearerToken.slice(7, bearerToken.length);
+        try {
+          if (verifyRsaJwtToken(jwtToken)) return true;
+        } catch (e) {
+          if (e instanceof Error) {
+            throwError({status: 401, error: {message: 'Unauthorised - Token invalid'}});
+          }
+        }
+      }
+      return (headers.get('Authorization') === 'Bearer fake-jwt-token')
+    }
+
+    function isTokenExpired() {
+      const bearerToken = headers.get('Authorization');
+      if (bearerToken && bearerToken.slice(0, 7) === 'Bearer ') {
+        const jwtToken = bearerToken.slice(7, bearerToken.length);
+        const token = decodeToken(jwtToken);
+        if (token instanceof Jwt) {
+          if (token.body.exp >= nowEpochSeconds()) return true;
+        }
+      }
+      return false;
+    }
+
+    function isInRole(role) {
+      const bearerToken = headers.get('Authorization');
+      if (bearerToken && bearerToken.slice(0, 7) === 'Bearer ') {
+        const jwtToken = bearerToken.slice(7, bearerToken.length);
+        const token = decodeToken(jwtToken);
+        if (token instanceof Jwt && token.body['roles']) {
+          const roles: Array<string> = token.body['roles'];
+          console.log('roles', roles, role);
+          if (roles.indexOf(role) > -1) return true;
+        }
+      }
+      return false;
     }
 
     function idFromUrl() {
@@ -194,14 +268,54 @@ export class MockBackendInterceptor implements HttpInterceptor {
       return urlParts[urlParts.length - 1];
     }
 
-    function isNumber(value: string | number): boolean
-    {
+    function createToken(username: string) {
+      const roles: Array<string> = username === 'admin' ? ['admin', 'user'] : ['user'];
+      const payLoad: IJwtStdPayload = {
+        iat: 0,
+        exp: 0,
+        iss: "",
+        aud: "",
+        sub: username,
+      };
+
+      const claims = {
+        roles: roles,
+        accessToken: 'secretaccesstoken',
+      };
+      const token = createRsaJwtToken(payLoad, claims);
+      // console.log (verifyRsaJwtToken(token));
+      return token;
+    }
+
+    function addTokenToHeader(headers: HttpHeaders, token: string): HttpHeaders {
+      return addItemToHeader(headers, 'Authorization', `Bearer ${token}`);
+    }
+
+    function addContentTypeToHeader(headers: HttpHeaders): HttpHeaders {
+      return addItemToHeader(headers, 'Content-Type', 'application/json');
+    }
+
+    function addAcceptToHeader(headers: HttpHeaders): HttpHeaders {
+      return addItemToHeader(headers, 'Accept', 'application/json');
+    }
+
+    function addItemToHeader(headers: HttpHeaders, key: string, item: string): HttpHeaders {
+      return headers.append(key, item);
+    }
+
+    function isNumber(value: string | number): boolean {
       return ((value != null) && !isNaN(Number(value.toString())));
     }
 
+    function nowEpochSeconds() {
+      return Math.floor(new Date().getTime() / 1000);
+    }
   }
 }
 
+/**
+ * Put the method call to the provider section of your NgModule
+ */
 export const mockBackendProvider = {
   // use fake backend in place of Http service for backend-less development
   provide: HTTP_INTERCEPTORS,
