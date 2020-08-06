@@ -79,7 +79,13 @@ export class MockBackendInterceptor implements HttpInterceptor {
         case url.match(/\/users\/\d+$/) && method === 'DELETE':
           response = deleteUser();
           break;
+        case url.endsWith('/users') && method === 'POST':
+          response = register();
+          break;
 
+        case url.match(/\/users\/\d+$/) && method === 'PUT':
+          response = changeUser();
+          break;
         case url.match(/\/auctions\/\d+$/) && method === 'GET':
           response = getAuction();
           break;
@@ -184,7 +190,23 @@ export class MockBackendInterceptor implements HttpInterceptor {
       localStorage.setItem('users', JSON.stringify(users));
       return ok();
     }
-
+    function changeUser() {
+      const user = body;
+      if (!user.id) user.id = idFromUrl();
+      let users = JSON.parse(localStorage.getItem('users')) || [];
+      users = users.filter(x => x.id === idFromUrl());
+      if (users.length > 0) {
+        // delete this user
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        users = users.filter(x => x.id !== idFromUrl());
+        // add changed user
+        users.push(user);
+        localStorage.setItem('users', JSON.stringify(users));
+        return ok(user);
+      } else {
+        return noContent('User with id ' + idFromUrl() + ' not found.')
+      }
+    }
     // helper functions
 
     function ok(body?, headers?: HttpHeaders) {

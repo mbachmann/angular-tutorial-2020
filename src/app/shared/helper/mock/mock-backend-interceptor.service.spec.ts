@@ -37,6 +37,17 @@ class User {
   lastName?: string;
 }
 
+const postUser: User = {
+  firstName: 'post',
+  lastName: 'post',
+  username: 'post',
+  password: 'post'
+};
+
+let regUserId: number = 0;
+let postUserId: number = 0;
+let adminUserId: number = 0;
+
 const regUser: User = {
   id: 0,
   firstName: 'default',
@@ -58,6 +69,8 @@ const loginUser: User = {
   username: 'default',
   password: 'default'
 };
+
+
 
 const loginAdminUser: User = {
   username: 'admin',
@@ -320,6 +333,63 @@ describe('MockBackendInterceptor', () => {
           done();
         });
   });
+
+  it('should create a postUser with valid token and role admin', (done) => {
+    httpClient.post<User>('/users', postUser, httpOptionsJwtToken)
+      .subscribe((data) => {
+          console.log('mockTestResponse', data);
+          expect(data.status).toBe(200);
+          expect(data.body.id).toBeGreaterThan(0);
+          postUserId = data.body.id;
+          done();
+        },
+        (err) => {
+          console.log('mockTestResponse', err);
+          done();
+        }, () => {
+          // console.log('Test complete');
+          done();
+        });
+  });
+
+  it('should change a postUser with valid token and role admin', (done) => {
+    postUser.firstName = "changed";
+    httpClient.put<User>('/users/' + postUserId, postUser, httpOptionsJwtToken)
+      .subscribe((data) => {
+          console.log('mockTestResponse', data);
+          expect(data.status).toBe(200);
+          expect(data.body.id).toBeGreaterThan(0);
+          expect(data.body.id).toBe(postUser.id);
+          expect(data.body.firstName).toEqual ("changed");
+          done();
+        },
+        (err) => {
+          console.log('mockTestResponse', err);
+          done();
+        }, () => {
+          // console.log('Test complete');
+          done();
+        });
+  });
+
+
+  it('should delete the postUser with valid token and role admin', (done) => {
+    httpClient.delete<User>('/users/' + postUserId,  httpOptionsJwtToken)
+      .subscribe((data) => {
+          console.log('mockTestResponse', data);
+          expect(data.status).toBe(200);
+          done();
+        },
+        (err) => {
+          console.log('mockTestResponse', err);
+          done();
+          fail();
+        }, () => {
+          // console.log('Test complete');
+          done();
+        });
+  });
+
 
   it('should authenticate a user', (done) => {
     httpClient.post<User>('/users/authenticate', loginUser, httpOptions)
