@@ -1,6 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AuctionDetailComponent } from './auction-detail.component';
+import {RouterTestingModule} from '@angular/router/testing';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {AuctionDataService} from '../shared/auction-data.service';
+import {HelperService} from '../../shared/helper';
 
 describe('AuctionDetailComponent', () => {
   let component: AuctionDetailComponent;
@@ -8,9 +13,19 @@ describe('AuctionDetailComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AuctionDetailComponent ]
+      imports: [
+        RouterTestingModule,
+        FormsModule,
+        ReactiveFormsModule,
+        HttpClientTestingModule
+      ],
+      declarations: [ AuctionDetailComponent ],
+      providers: [
+        AuctionDataService,
+        HelperService
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
