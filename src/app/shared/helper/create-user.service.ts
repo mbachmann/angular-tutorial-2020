@@ -1,6 +1,5 @@
 import {first} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
-import {Router} from '@angular/router';
 import {User} from '../model/user';
 import {UserService} from '../service/user.service';
 
@@ -8,7 +7,7 @@ import {UserService} from '../service/user.service';
 export class CreateUserService {
 
   constructor(
-    private router: Router,
+    // private router: Router,
     private userService: UserService
   ) {
   }
@@ -36,7 +35,10 @@ export class CreateUserService {
         password: userName,
         email: userName + '@mail.com',
         thresholdOpenPayment: 1000,
-        locked: false
+        locked: false,
+        token: null,
+        refreshToken: null,
+        expires: null
       };
       this.registerUser(user);
     }

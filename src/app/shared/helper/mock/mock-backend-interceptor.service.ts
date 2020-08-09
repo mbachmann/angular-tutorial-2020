@@ -10,8 +10,18 @@ import {
 import {Observable, of, throwError} from 'rxjs';
 import {delay, mergeMap, materialize, dematerialize, tap} from 'rxjs/operators';
 import {AUCTION_DATA} from '../../../auction/shared/auction-data';
-import {createRsaJwtToken, verifyRsaJwtToken} from './jwt-backend.data';
+import {
+  createMockUser,
+  createRsaJwtToken,
+  createTestRefreshToken,
+  createTestToken, createUser, mockAdmin, MockUser, mockUser, nowEpochSeconds,
+  publicKey,
+  verifyRsaJwtToken
+} from './jwt-backend.data';
 import {decodeToken, IJwtStdPayload, Jwt} from '../helper.jwt';
+import {CreateUserService} from '../create-user.service';
+import {UserService} from '../../service/user.service';
+import {User} from '../../model/user';
 
 /**
  * The mock backend interceptor is used to simulate a backend. The interceptor allows
@@ -25,6 +35,17 @@ import {decodeToken, IJwtStdPayload, Jwt} from '../helper.jwt';
  * Based on: https://jasonwatmore.com/post/2019/05/02/angular-7-mock-backend-example-for-backendless-development
  *
  */
+
+// array in local storage for users
+const usersKey = 'users';
+// const users = JSON.parse(localStorage.getItem(usersKey)) || [];
+
+const users = [];
+users.push(mockAdmin);
+users.push(mockUser);
+localStorage.setItem(usersKey, JSON.stringify(users));
+
+
 @Injectable()
 export class MockBackendInterceptor implements HttpInterceptor {
 
@@ -39,7 +60,7 @@ export class MockBackendInterceptor implements HttpInterceptor {
     return of(null)
       .pipe(mergeMap(() => handleRoute()))
       .pipe(materialize()) // call materialize and dematerialize to ensure delay
-      .pipe(delay(500))
+      .pipe(delay(100))
       .pipe(dematerialize())
       .pipe(tap({
         next: data => {
@@ -64,9 +85,15 @@ export class MockBackendInterceptor implements HttpInterceptor {
         case url.endsWith('/users/authenticate') && method === 'POST':
           response = authenticate();
           break;
+
         case url.endsWith('/users/register') && method === 'POST':
           response = register();
           break;
+
+        case url.endsWith('/users/refresh_token') && method === 'POST':
+          response = refreshToken();
+          break;
+
         case url.endsWith('/users') && method === 'GET':
           response = getUsers();
           break;
@@ -79,6 +106,7 @@ export class MockBackendInterceptor implements HttpInterceptor {
         case url.match(/\/users\/\d+$/) && method === 'DELETE':
           response = deleteUser();
           break;
+
         case url.endsWith('/users') && method === 'POST':
           response = register();
           break;
@@ -86,6 +114,7 @@ export class MockBackendInterceptor implements HttpInterceptor {
         case url.match(/\/users\/\d+$/) && method === 'PUT':
           response = changeUser();
           break;
+
         case url.match(/\/auctions\/\d+$/) && method === 'GET':
           response = getAuction();
           break;
@@ -98,6 +127,8 @@ export class MockBackendInterceptor implements HttpInterceptor {
           // pass through any requests not handled above
           response = next.handle(request);
       }
+      // response.subscribe(data => {console.log('mockResponse', response);})
+
       return response;
     }
 
@@ -105,39 +136,70 @@ export class MockBackendInterceptor implements HttpInterceptor {
 
     function authenticate() {
       const {username, password} = body;
-      let users = JSON.parse(localStorage.getItem('users')) || [];
-      const user = users.find(x => x.username === username && x.password === password);
-      if (!user) {
-        return error('Username or password is incorrect');
+      let mockUsers: Array<MockUser> = JSON.parse(localStorage.getItem(usersKey)) || [];
+      const mockUser: MockUser = mockUsers.find(x => x.username === username && x.password === password);
+      if (!mockUser) {
+        return notFound('Username or password is incorrect');
       } else {
-        const token = createToken(user.username);
-        let headers: HttpHeaders = new HttpHeaders();
-        headers = addTokenToHeader(headers, token);
-        headers = addAcceptToHeader(headers);
-        headers = addContentTypeToHeader(headers);
-        return ok({
-          id: user.id,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName
-        }, headers);
+        mockUser.tokens.push(createTestToken(username));
+        mockUser.refreshTokens.push(createTestRefreshToken(username));
+        localStorage.setItem(usersKey, JSON.stringify(mockUsers));
+
+        const user: User = createUser(mockUser);
+        user.publicKey = publicKey;
+
+        const responseHeader: HttpHeaders = createHeader( user.token);
+        return ok(user, responseHeader);
       }
     }
 
     function register() {
       const user = body;
-      let users = JSON.parse(localStorage.getItem('users')) || [];
-      // console.log(users);
-      if (users.find(x => x.username === user.username)) {
+      let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
+
+      if (mockUsers.find(x => x.username === user.username)) {
         return error('Username "' + user.username + '" is already taken')
       }
-      console.log(user);
-      user.id = users.length ? Math.max(...users.map(x => x.id)) + 1 : 1;
-      console.log(user);
-      users.push(user);
-      localStorage.setItem('users', JSON.stringify(users));
+      user.id = mockUsers.length ? Math.max(...mockUsers.map(x => x.id)) + 1 : 1;
+      const mockUser: MockUser = createMockUser(user);
+      mockUsers.push(mockUser);
+      localStorage.setItem(usersKey, JSON.stringify(mockUsers));
 
-      return ok(user);
+      const responseHeaders = createResisterHeader();
+      // const responseHeaders: HttpHeaders = createHeader( 'ok');
+      return ok(user, responseHeaders);
+    }
+
+    function refreshToken() {
+      if (!isLoggedIn()) return unauthorized();
+      if (!isTokenExpired()) return expired();
+
+      const {username, refreshToken} = body;
+      if (!isRefreshTokenExpired(refreshToken)) return expired();
+
+      let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
+      const mockUser: MockUser = mockUsers.find(x => x.username === username);
+
+      if (!mockUser) {
+        return error(`Username ${mockUser} not found`);
+      } else {
+        const refreshTok = mockUser.refreshTokens.find(x => x === refreshToken);
+
+        if (!refreshTok) {
+          return error('refreshToken not found');
+        } else {
+          mockUser.tokens.push(createTestToken(username));
+          mockUser.refreshTokens.push(createTestRefreshToken(username));
+          localStorage.setItem(usersKey, JSON.stringify(mockUsers));
+
+          const user: User = createUser(mockUser);
+          user.publicKey = publicKey;
+
+          const responseHeader: HttpHeaders  = createHeader(user.token);
+          JSON.stringify(responseHeader);
+          return ok(user, responseHeader);
+        }
+      }
     }
 
     function getUsers() {
@@ -145,28 +207,59 @@ export class MockBackendInterceptor implements HttpInterceptor {
       if (!isTokenExpired()) return expired();
       if (!isInRole('admin')) return notInRole();
 
-      let users = JSON.parse(localStorage.getItem('users')) || [];
+      let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
       if (!isLoggedIn()) return unauthorized();
+
+      const users = [];
+      mockUsers.forEach(mockUser => users.push(createUser(mockUser)))
       return ok(users);
     }
 
     function getUser() {
-      let users = JSON.parse(localStorage.getItem('users')) || [];
-      users = users.filter(x => x.id === idFromUrl());
-      if (users.length > 0) {
-        return ok(users[0]);
+      if (!isLoggedIn()) return unauthorized();
+      let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
+      mockUsers = mockUsers.filter(x => x.id === idFromUrl());
+      if (mockUsers.length > 0) {
+        return ok(createUser(mockUsers[0]));
       } else {
         return noContent('User with id ' + idFromUrl() + ' not found.')
       }
     }
 
     function getUserByName() {
-      let users = JSON.parse(localStorage.getItem('users')) || [];
-      users = users.filter(x => x.username === nameFromUrl());
-      if (users.length > 0) {
-        return ok(users[0]);
+      if (!isLoggedIn()) return unauthorized();
+      let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
+      mockUsers = mockUsers.filter(x => x.username === nameFromUrl());
+      if (mockUsers.length > 0) {
+        return ok(createUser(mockUsers[0]));
       } else {
         return noContent('User with name ' + nameFromUrl() + ' not found.')
+      }
+    }
+    function deleteUser() {
+      if (!isLoggedIn()) return unauthorized();
+      let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
+      mockUsers = mockUsers.filter(x => x.id !== idFromUrl());
+      localStorage.setItem(usersKey, JSON.stringify(mockUsers));
+      return ok();
+    }
+
+    function changeUser() {
+      if (!isLoggedIn()) return unauthorized();
+      const user = body;
+      if (!user.id) user.id = idFromUrl();
+      let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
+      mockUsers = mockUsers.filter(x => x.id === idFromUrl());
+      if (mockUsers.length > 0) {
+        // delete this user
+        let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
+        mockUsers = mockUsers.filter(x => x.id !== idFromUrl());
+        // add changed user
+        mockUsers.push(user);
+        localStorage.setItem(usersKey, JSON.stringify(mockUsers));
+        return ok(user);
+      } else {
+        return noContent('User with id ' + idFromUrl() + ' not found.')
       }
     }
 
@@ -183,30 +276,7 @@ export class MockBackendInterceptor implements HttpInterceptor {
       }
     }
 
-    function deleteUser() {
-      if (!isLoggedIn()) return unauthorized();
-      let users = JSON.parse(localStorage.getItem('users')) || [];
-      users = users.filter(x => x.id !== idFromUrl());
-      localStorage.setItem('users', JSON.stringify(users));
-      return ok();
-    }
-    function changeUser() {
-      const user = body;
-      if (!user.id) user.id = idFromUrl();
-      let users = JSON.parse(localStorage.getItem('users')) || [];
-      users = users.filter(x => x.id === idFromUrl());
-      if (users.length > 0) {
-        // delete this user
-        let users = JSON.parse(localStorage.getItem('users')) || [];
-        users = users.filter(x => x.id !== idFromUrl());
-        // add changed user
-        users.push(user);
-        localStorage.setItem('users', JSON.stringify(users));
-        return ok(user);
-      } else {
-        return noContent('User with id ' + idFromUrl() + ' not found.')
-      }
-    }
+
     // helper functions
 
     function ok(body?, headers?: HttpHeaders) {
@@ -215,27 +285,33 @@ export class MockBackendInterceptor implements HttpInterceptor {
     }
 
     function error(message) {
-      return throwError({error: {message}});
+      const resp = new HttpResponse({body: message, headers: headers, status: 404});
+      return of(new HttpResponse(resp));
     }
 
     function unauthorized() {
-      return throwError({status: 401, error: {message: 'Unauthorised'}});
+      const resp = new HttpResponse({body: 'Unauthorised', headers: headers, status: 401});
+      return of(new HttpResponse(resp));
     }
 
     function expired() {
-      return throwError({status: 401, error: {message: 'Unauthorised - Token expired'}});
+      const resp = new HttpResponse({body: 'Unauthorised - Token expired', headers: headers, status: 401});
+      return of(new HttpResponse(resp));
     }
 
     function notInRole() {
-      return throwError({status: 403, error: {message: 'Forbidden - not correct role'}});
+      const resp = new HttpResponse({body: 'Forbidden - not correct role', headers: headers, status: 403});
+      return of(new HttpResponse(resp));
     }
 
-    function notFound() {
-      return throwError({status: 404, error: {message: 'Not found'}});
+    function notFound(message) {
+      const resp = new HttpResponse({body: message, headers: headers, status: 404});
+      return of(new HttpResponse(resp));
     }
 
     function noContent(message) {
-      return throwError({status: 204, error: {message: message}});
+      const resp = new HttpResponse({body: message, headers: headers, status: 204});
+      return of(new HttpResponse(resp));
     }
 
 
@@ -266,6 +342,14 @@ export class MockBackendInterceptor implements HttpInterceptor {
       return false;
     }
 
+    function isRefreshTokenExpired(refreshToken: string) {
+      const token = decodeToken(refreshToken);
+      if (token instanceof Jwt) {
+        if (token.body.exp >= nowEpochSeconds()) return true;
+      }
+      return false;
+    }
+
     function isInRole(role) {
       const bearerToken = headers.get('Authorization');
       if (bearerToken && bearerToken.slice(0, 7) === 'Bearer ') {
@@ -290,24 +374,21 @@ export class MockBackendInterceptor implements HttpInterceptor {
       return urlParts[urlParts.length - 1];
     }
 
-    function createToken(username: string) {
-      const roles: Array<string> = username === 'admin' ? ['admin', 'user'] : ['user'];
-      const payLoad: IJwtStdPayload = {
-        iat: 0,
-        exp: 0,
-        iss: "",
-        aud: "",
-        sub: username,
-      };
-
-      const claims = {
-        roles: roles,
-        accessToken: 'secretaccesstoken',
-      };
-      const token = createRsaJwtToken(payLoad, claims);
-      // console.log (verifyRsaJwtToken(token));
-      return token;
+    function createHeader(token: string): HttpHeaders {
+      return new HttpHeaders({
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`
+      });
     }
+
+    function createResisterHeader(): HttpHeaders {
+      return new HttpHeaders({
+        'Content-Type': 'application/json',
+        Accept: '"application/json'
+      });
+    }
+
 
     function addTokenToHeader(headers: HttpHeaders, token: string): HttpHeaders {
       return addItemToHeader(headers, 'Authorization', `Bearer ${token}`);
@@ -329,9 +410,6 @@ export class MockBackendInterceptor implements HttpInterceptor {
       return ((value != null) && !isNaN(Number(value.toString())));
     }
 
-    function nowEpochSeconds() {
-      return Math.floor(new Date().getTime() / 1000);
-    }
   }
 }
 

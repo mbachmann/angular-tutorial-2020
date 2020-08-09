@@ -7,4 +7,9 @@ export class User {
   email?: string;
   thresholdOpenPayment?: number;
   locked?: boolean;
+  token?: string;
+  refreshToken?: string;
+  roles?: Array<string>;
+  expires?: number;
+  publicKey?: string;
 }

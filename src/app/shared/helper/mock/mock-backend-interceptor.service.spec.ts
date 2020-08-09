@@ -35,13 +35,25 @@ class User {
   password: string;
   firstName?: string;
   lastName?: string;
+  email?: string;
+  thresholdOpenPayment?: number;
+  locked?: boolean;
+  token?: string;
+  refreshToken?: string;
+  expires?: number;
 }
 
 const postUser: User = {
   firstName: 'post',
   lastName: 'post',
   username: 'post',
-  password: 'post'
+  password: 'post',
+  email: 'post' + '@mail.com',
+  thresholdOpenPayment: 1000,
+  locked: false,
+  token: null,
+  refreshToken: null,
+  expires: null
 };
 
 let regUserId: number = 0;
@@ -53,7 +65,13 @@ const regUser: User = {
   firstName: 'default',
   lastName: 'default',
   username: 'default',
-  password: 'default'
+  password: 'default',
+  email: 'default1' + '@mail.com',
+  thresholdOpenPayment: 1000,
+  locked: false,
+  token: null,
+  refreshToken: null,
+  expires: null
 };
 
 const adminRegUser: User = {
@@ -61,7 +79,13 @@ const adminRegUser: User = {
   firstName: 'admin',
   lastName: 'admin',
   username: 'admin',
-  password: 'admin'
+  password: 'admin',
+  email: 'admin' + '@mail.com',
+  thresholdOpenPayment: 1000,
+  locked: false,
+  token: null,
+  refreshToken: null,
+  expires: null
 };
 
 
@@ -70,6 +94,10 @@ const loginUser: User = {
   password: 'default'
 };
 
+const loginUserRefresh = {
+  username: 'default',
+  refreshToken: 'default'
+};
 
 
 const loginAdminUser: User = {
@@ -115,10 +143,14 @@ describe('MockBackendInterceptor', () => {
   });
 
   it('should catch 401', (done) => {
-    httpClient.get('/error').subscribe(() => {
-    }, () => {
+    httpClient.get('/error', httpOptions)
+      .subscribe((data) => {
+         expect(data.status).toBe(401);
+         done();
+      }, (err) => {
+        expect(err.status).toBe(401);
       // Perform test
-      done();
+         done();
     });
 
     http.expectOne('/error').error(new ErrorEvent('Unauthorized error'), {
@@ -129,8 +161,9 @@ describe('MockBackendInterceptor', () => {
 
   it('should catch 401 at get users', (done) => {
     httpClient.get('/users', httpOptions)
-      .subscribe(() => {
-        fail();
+      .subscribe((data) => {
+        expect(data.status).toBe(401);
+        done();
       }, (err) => {
         console.log('mockTestResponse', err);
         expect(err.status).toBe(401);
@@ -176,17 +209,18 @@ describe('MockBackendInterceptor', () => {
         });
   });
 
-  it('should register an admin', (done) => {
+  it('should not register an admin because already registered', (done) => {
     httpClient.post<User>('/users/register', adminRegUser, httpOptions)
       .subscribe((data) => {
-          const user: User = data.body;
+          console.log('mockTestResponse', data);
           const status: number = data.status;
-          expect(status).toBe(200);
-          expect(user.username).toEqual(adminRegUser.username);
+          expect(status).toBe(404);
+          const user: User = data.body;
+          // expect(user.username).toEqual(adminRegUser.username);
           done();
         },
         (err) => {
-          // console.log('mockTestResponse', err);
+          console.log('mockTestResponse', err);
           done();
         }, () => {
           // console.log('Test complete');
@@ -208,6 +242,8 @@ describe('MockBackendInterceptor', () => {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + jwtToken
               });
+              // console.log('roles=' + token.body['roles']);
+              // expect(token.body['roles']).toEqual(loginAdminUser.username);
             } else fail();
           } else fail();
           const user: User = data.body;
@@ -228,9 +264,11 @@ describe('MockBackendInterceptor', () => {
 
   it('should not authenticate an unknown user', (done) => {
     httpClient.post<User>('/users/authenticate', unknowLoginUser, httpOptions)
-      .subscribe((data) => {
-          console.log('mockTestResponse', data);
-          fail();
+      .subscribe(data => {
+          console.log('mockTestResponse1', data);
+          const status: number = data.status;
+          expect(status).toBe(404);
+          // fail();
           done();
         },
         (err) => {
@@ -252,7 +290,9 @@ describe('MockBackendInterceptor', () => {
     httpClient.post<User>('/users/authenticate', wrongPasswordLoginUser, httpOptions)
       .subscribe((data) => {
           console.log('mockTestResponse', data);
-          fail();
+          const status: number = data.status;
+          expect(status).toBe(404);
+          // fail();
           done();
         },
         (err) => {
@@ -273,8 +313,8 @@ describe('MockBackendInterceptor', () => {
   it('should get all users with valid token and role admin', (done) => {
     httpClient.get<User>('/users', httpOptionsJwtToken)
       .subscribe((data) => {
-          console.log('mockTestResponse', data);
           expect(data.status).toBe(200);
+          console.log('mockTestResponse', data.body[0]);
           expect(data.body[0].id).toBeGreaterThan(0);
           done();
         },
@@ -297,7 +337,7 @@ describe('MockBackendInterceptor', () => {
     httpClient.get<User>('/users', httpOptionsExpiredJwtToken)
       .subscribe((data) => {
           console.log('mockTestResponse', data);
-          fail();
+          expect(data.status).toBe(401);
           done();
         },
         (err) => {
@@ -321,7 +361,7 @@ describe('MockBackendInterceptor', () => {
     httpClient.get<User>('/users', httpOptionsInvalidJwtToken)
       .subscribe((data) => {
           console.log('mockTestResponse', data);
-          fail();
+          expect(data.status).toBe(401);
           done();
         },
         (err) => {
@@ -405,6 +445,8 @@ describe('MockBackendInterceptor', () => {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + jwtToken
               });
+              loginUserRefresh.refreshToken = data.body.refreshToken;
+              console.log('refreshToken=' + loginUserRefresh.refreshToken);
             } else fail();
           } else fail();
           const user: User = data.body;
@@ -428,7 +470,8 @@ describe('MockBackendInterceptor', () => {
     httpClient.get<User>('/users', httpOptionsJwtToken)
       .subscribe((data) => {
           console.log('mockTestResponse', data);
-          fail();
+          expect(data.status).toBe(403);
+          //fail();
           done();
         },
         (err) => {
@@ -441,5 +484,41 @@ describe('MockBackendInterceptor', () => {
         });
   });
 
+  it('should send a refresh token', (done) => {
+    httpClient.post<User>('/users/refresh_token', loginUserRefresh, httpOptionsJwtToken)
+      .subscribe((data) => {
+        console.log('mockTestResponse', data);
+          const bearerToken = data.headers.get('Authorization');
+          if (bearerToken && bearerToken.slice(0, 7) === 'Bearer ') {
+            const jwtToken = bearerToken.slice(7, bearerToken.length);
+            const token = decodeToken(jwtToken);
+            if (token instanceof Jwt) {
+              expect(token.body.sub).toEqual(loginUser.username);
+              httpOptionsJwtToken.headers = new HttpHeaders({
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + jwtToken
+              });
+              const refreshToken = decodeToken(data.body.refreshToken);
+              if (refreshToken instanceof Jwt) {
+                expect(refreshToken.body.sub).toEqual(loginUser.username);
+              } else fail();
+              loginUserRefresh.refreshToken = data.body.refreshToken;
 
+            } else fail();
+          } else fail();
+          const user: User = data.body;
+          const status: number = data.status;
+          expect(status).toBe(200);
+          expect(user.username).toEqual(loginUser.username);
+          done();
+        },
+        (err) => {
+          console.log('mockTestResponse', err);
+          expect(err.status).toBe(200);
+          done();
+        }, () => {
+          // console.log('Test complete');
+          done();
+        });
+  });
 });

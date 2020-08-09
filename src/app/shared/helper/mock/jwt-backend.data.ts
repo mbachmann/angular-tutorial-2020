@@ -1,5 +1,6 @@
 
 import {IJwtHeader, IJwtStdPayload, createToken, verifyToken} from '../helper.jwt';
+import {User} from '../../model/user';
 
 const issuer  = 'ZHAW';
 const subject  = 'Auction-App';
@@ -51,4 +52,123 @@ export function verifyRsaJwtToken(token: string) {
 
 export function verifyHmacJwtToken(token: string) {
   return verifyToken(token, sharedSecret);
+}
+
+export function createTestToken(username: string) {
+  const roles: Array<string> = username === 'admin' ? ['admin', 'user'] : ['user'];
+  const payLoad: IJwtStdPayload = {
+    iat: 0,
+    exp: createExpiresDateTime(),
+    iss: "",
+    aud: "",
+    sub: username,
+  };
+
+  const claims = {
+    roles: roles,
+    accessToken: 'secretaccesstoken',
+  };
+  return createRsaJwtToken(payLoad, claims);
+  // console.log (verifyRsaJwtToken(token));
+  // return token;
+}
+
+export function createTestRefreshToken(username: string) {
+  const payLoad: IJwtStdPayload = {
+    iat: 0,
+    exp: createExpiresDateTime(),
+    iss: "",
+    aud: "",
+    sub: username,
+  };
+  const claims = {
+    accessToken: 'secretaccesstoken',
+  };
+  return createRsaJwtToken(payLoad, claims);
+  // console.log (verifyRsaJwtToken(token));
+  // return token;
+}
+
+export function nowEpochSeconds() {
+  return Math.floor(new Date().getTime() / 1000);
+}
+
+export function createExpiresDateTime() {
+  const exp = (nowEpochSeconds() + (60 * 60)) * 1000
+  return Math.floor(new Date(exp).getTime() / 1000);
+}
+
+export class MockUser {
+  id?: number;
+  username: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  thresholdOpenPayment?: number;
+  locked?: boolean;
+  tokens?: Array<string>;
+  refreshTokens?: Array<string>;
+  expires?: number;
+}
+
+
+export const mockAdmin: MockUser = {
+  id: 1,
+  firstName: 'admin',
+  lastName: 'admin',
+  username: 'admin',
+  password: 'admin',
+  email: 'admin' + '@mail.com',
+  thresholdOpenPayment: 1000,
+  locked: false,
+  tokens: [createTestToken('admin')],
+  refreshTokens: [createTestRefreshToken('admin')],
+  expires: createExpiresDateTime()
+};
+
+export const mockUser: MockUser = {
+  id: 2,
+  firstName: 'user',
+  lastName: 'user',
+  username: 'user',
+  password: 'user',
+  email: 'user' + '@mail.com',
+  thresholdOpenPayment: 1000,
+  locked: false,
+  tokens: [createTestToken('user')],
+  refreshTokens: [createTestRefreshToken('user')],
+  expires: createExpiresDateTime()
+};
+
+export function createUser(mockUser: MockUser): User {
+  const user = new User();
+  user.id = mockUser.id;
+  user.firstName = mockUser.firstName;
+  user.lastName = mockUser.lastName;
+  user.username = mockUser.username;
+  user.password = mockUser.password;
+  user.email = mockUser.email;
+  user.thresholdOpenPayment = mockUser.thresholdOpenPayment;
+  user.locked = mockUser.locked;
+  if (mockUser.tokens) user.token = mockUser.tokens[mockUser.tokens.length - 1];
+  if (mockUser.refreshTokens) user.refreshToken = mockUser.refreshTokens[mockUser.refreshTokens.length - 1];
+  user.expires = mockUser.expires;
+  return user;
+}
+
+export function createMockUser(user: User): MockUser {
+  const mockUser= new MockUser();
+  mockUser.id = user.id;
+  mockUser.firstName = user.firstName;
+  mockUser.lastName = user.lastName;
+  mockUser.username = user.username;
+  mockUser.password = user.password;
+  mockUser.email = user.email;
+  mockUser.thresholdOpenPayment = user.thresholdOpenPayment;
+  mockUser.locked = user.locked;
+  (user.token) ? mockUser.tokens.push(user.token) : mockUser.tokens = [];
+  (user.refreshToken) ? mockUser.refreshTokens.push(user.refreshToken) : mockUser.refreshTokens = [];
+  mockUser.expires = user.expires;
+  return mockUser;
 }
