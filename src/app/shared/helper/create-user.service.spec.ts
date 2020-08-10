@@ -26,12 +26,12 @@ describe('CreateUserService', () => {
   });
 
   it('should be created', () => {
-    const service = TestBed.get(CreateUserService);
+    const service = TestBed.inject(CreateUserService);
     expect(service).toBeTruthy();
   });
 
   it('should create a user', fakeAsync ( () => {
-    const service = TestBed.get(CreateUserService);
+    const service = TestBed.inject(CreateUserService);
     // create test user
     const testuser = 'testuser';
 
@@ -48,8 +48,8 @@ describe('CreateUserService', () => {
     localStorage.setItem('users', JSON.stringify(users));
   }));
 
-  async function delay(ms: number) {
-    await new Promise(resolve => setTimeout(()=>resolve(), ms)).then(()=>console.log("fired"));
+  async function delay(ms: number): Promise<void> {
+    await new Promise(resolve => setTimeout(() => resolve(), ms)).then(() => console.log('fired'));
   }
 
 });

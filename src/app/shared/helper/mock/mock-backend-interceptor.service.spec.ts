@@ -9,22 +9,22 @@ import {decodeToken, Jwt} from '../helper.jwt';
 const httpOptions = {
   headers: new HttpHeaders({
     'Content-Type': 'application/json',
-    'Authorization': 'my-auth-token'
+    Authorization: 'my-auth-token'
   }),
   observe: 'response' as 'response'
 };
 
-let httpOptionsJwtToken = {
+const httpOptionsJwtToken = {
   headers: null,
   observe: 'response' as 'response'
 };
 
-let httpOptionsExpiredJwtToken = {
+const httpOptionsExpiredJwtToken = {
   headers: null,
   observe: 'response' as 'response'
 };
 
-let httpOptionsInvalidJwtToken = {
+const httpOptionsInvalidJwtToken = {
   headers: null,
   observe: 'response' as 'response'
 };
@@ -56,9 +56,9 @@ const postUser: User = {
   expires: null
 };
 
-let regUserId: number = 0;
-let postUserId: number = 0;
-let adminUserId: number = 0;
+const regUserId = 0;
+let postUserId = 0;
+const adminUserId = 0;
 
 const regUser: User = {
   id: 0,
@@ -120,7 +120,7 @@ const expiredRsa256Token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE1Njg
 
 describe('MockBackendInterceptor', () => {
 
-  let service: MockBackendInterceptor;
+  // let service: MockBackendInterceptor;
   let http: HttpTestingController;
   let httpClient: HttpClient;
 
@@ -138,20 +138,20 @@ describe('MockBackendInterceptor', () => {
         }
       ]
     });
-    http = testBed.get(HttpTestingController);
-    httpClient = testBed.get(HttpClient);
+    http = testBed.inject(HttpTestingController);
+    httpClient = testBed.inject(HttpClient);
   });
 
   it('should catch 401', (done) => {
     httpClient.get('/error', httpOptions)
       .subscribe((data) => {
-         expect(data.status).toBe(401);
-         done();
+        expect(data.status).toBe(401);
+        done();
       }, (err) => {
         expect(err.status).toBe(401);
-      // Perform test
-         done();
-    });
+        // Perform test
+        done();
+      });
 
     http.expectOne('/error').error(new ErrorEvent('Unauthorized error'), {
       status: 401
@@ -240,12 +240,12 @@ describe('MockBackendInterceptor', () => {
               expect(token.body.sub).toEqual(loginAdminUser.username);
               httpOptionsJwtToken.headers = new HttpHeaders({
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + jwtToken
+                Authorization: 'Bearer ' + jwtToken
               });
               // console.log('roles=' + token.body['roles']);
               // expect(token.body['roles']).toEqual(loginAdminUser.username);
-            } else fail();
-          } else fail();
+            } else { fail(); }
+          } else { fail(); }
           const user: User = data.body;
           const status: number = data.status;
           expect(status).toBe(200);
@@ -331,7 +331,7 @@ describe('MockBackendInterceptor', () => {
   it('should NOT get all users with an EXPIRED token and role admin with return 401', (done) => {
     httpOptionsExpiredJwtToken.headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + expiredRsa256Token
+      Authorization: 'Bearer ' + expiredRsa256Token
     });
 
     httpClient.get<User>('/users', httpOptionsExpiredJwtToken)
@@ -355,7 +355,7 @@ describe('MockBackendInterceptor', () => {
     bearerToken = bearerToken.slice(0, -1) + '0';
     httpOptionsInvalidJwtToken.headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + bearerToken
+      Authorization: 'Bearer ' + bearerToken
     });
 
     httpClient.get<User>('/users', httpOptionsInvalidJwtToken)
@@ -393,14 +393,14 @@ describe('MockBackendInterceptor', () => {
   });
 
   it('should change a postUser with valid token and role admin', (done) => {
-    postUser.firstName = "changed";
+    postUser.firstName = 'changed';
     httpClient.put<User>('/users/' + postUserId, postUser, httpOptionsJwtToken)
       .subscribe((data) => {
           console.log('mockTestResponse', data);
           expect(data.status).toBe(200);
           expect(data.body.id).toBeGreaterThan(0);
           expect(data.body.id).toBe(postUser.id);
-          expect(data.body.firstName).toEqual ("changed");
+          expect(data.body.firstName).toEqual('changed');
           done();
         },
         (err) => {
@@ -414,7 +414,7 @@ describe('MockBackendInterceptor', () => {
 
 
   it('should delete the postUser with valid token and role admin', (done) => {
-    httpClient.delete<User>('/users/' + postUserId,  httpOptionsJwtToken)
+    httpClient.delete<User>('/users/' + postUserId, httpOptionsJwtToken)
       .subscribe((data) => {
           console.log('mockTestResponse', data);
           expect(data.status).toBe(200);
@@ -443,12 +443,12 @@ describe('MockBackendInterceptor', () => {
               expect(token.body.sub).toEqual(loginUser.username);
               httpOptionsJwtToken.headers = new HttpHeaders({
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + jwtToken
+                Authorization: 'Bearer ' + jwtToken
               });
               loginUserRefresh.refreshToken = data.body.refreshToken;
               console.log('refreshToken=' + loginUserRefresh.refreshToken);
-            } else fail();
-          } else fail();
+            } else { fail(); }
+          } else { fail(); }
           const user: User = data.body;
           const status: number = data.status;
           expect(status).toBe(200);
@@ -471,7 +471,7 @@ describe('MockBackendInterceptor', () => {
       .subscribe((data) => {
           console.log('mockTestResponse', data);
           expect(data.status).toBe(403);
-          //fail();
+          // fail();
           done();
         },
         (err) => {
@@ -487,7 +487,7 @@ describe('MockBackendInterceptor', () => {
   it('should send a refresh token', (done) => {
     httpClient.post<User>('/users/refresh_token', loginUserRefresh, httpOptionsJwtToken)
       .subscribe((data) => {
-        console.log('mockTestResponse', data);
+          console.log('mockTestResponse', data);
           const bearerToken = data.headers.get('Authorization');
           if (bearerToken && bearerToken.slice(0, 7) === 'Bearer ') {
             const jwtToken = bearerToken.slice(7, bearerToken.length);
@@ -496,16 +496,16 @@ describe('MockBackendInterceptor', () => {
               expect(token.body.sub).toEqual(loginUser.username);
               httpOptionsJwtToken.headers = new HttpHeaders({
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + jwtToken
+                Authorization: 'Bearer ' + jwtToken
               });
               const refreshToken = decodeToken(data.body.refreshToken);
               if (refreshToken instanceof Jwt) {
                 expect(refreshToken.body.sub).toEqual(loginUser.username);
-              } else fail();
+              } else { fail(); }
               loginUserRefresh.refreshToken = data.body.refreshToken;
 
-            } else fail();
-          } else fail();
+            } else { fail(); }
+          } else { fail(); }
           const user: User = data.body;
           const status: number = data.status;
           expect(status).toBe(200);

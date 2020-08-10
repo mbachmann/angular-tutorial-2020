@@ -37,7 +37,7 @@ export class AngularDateHttpInterceptorService implements HttpInterceptor {
     ));
   }
 
-  convertToDate(body) {
+  convertToDate(body): Date {
     if (body === null || body === undefined) {
       return body;
     }
@@ -56,7 +56,7 @@ export class AngularDateHttpInterceptorService implements HttpInterceptor {
     }
   }
 
-  isIso8601(value) {
+  isIso8601(value): boolean {
     if (value === null || value === undefined) {
       return false;
     }

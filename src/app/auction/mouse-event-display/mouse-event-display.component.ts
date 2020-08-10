@@ -13,7 +13,7 @@ export class MouseEventDisplayComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
+  ngOnInit(): void {
   }
 
   public onEvent(event: MouseEvent): void {

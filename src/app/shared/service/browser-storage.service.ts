@@ -7,7 +7,7 @@ export class BrowserStorageService {
 
   // Remember-me is influenced by the user signing the data protection contract
   // or can be part of the login dialog
-  private _rememberMe: boolean = false;
+  private _rememberMe = false;
 
   constructor() {
   }
@@ -20,24 +20,40 @@ export class BrowserStorageService {
     this._rememberMe = value;
   }
 
-  removeItem(name: string) {
-    if (this._rememberMe) localStorage.removeItem(name);
-    else sessionStorage.removeItem(name)
+  removeItem(name: string): void {
+    if (this._rememberMe) {
+      localStorage.removeItem(name);
+    }
+    else {
+      sessionStorage.removeItem(name);
+    }
   }
 
   getItem(name: string): string {
-    if (this._rememberMe) return localStorage.getItem(name);
-    else return sessionStorage.getItem(name)
+    if (this._rememberMe) {
+      return localStorage.getItem(name);
+    }
+    else {
+      return sessionStorage.getItem(name);
+    }
   }
 
-  setItem(name: string, value: string) {
-    if (this._rememberMe) localStorage.setItem(name, value);
-    else sessionStorage.setItem(name, value)
+  setItem(name: string, value: string): void {
+    if (this._rememberMe) {
+      localStorage.setItem(name, value);
+    }
+    else {
+      sessionStorage.setItem(name, value);
+    }
   }
 
-  clear() {
+  clear(): void {
 
-    if (this._rememberMe) localStorage.clear();
-    else sessionStorage.clear();
+    if (this._rememberMe) {
+      localStorage.clear();
+    }
+    else {
+      sessionStorage.clear();
+    }
   }
 }

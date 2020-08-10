@@ -53,34 +53,34 @@ vwaa2Hwhcg66xUzcqwIDAQAB
 
 
 const hmac256Header: IJwtHeader = {
-  "typ": "JWT",
-  "alg": "HS256"
+  typ: 'JWT',
+  alg: 'HS256'
 };
 
 const hmac384Header: IJwtHeader = {
-  "typ": "JWT",
-  "alg": "HS384"
+  typ: 'JWT',
+  alg: 'HS384'
 };
 
 const hmac512Header: IJwtHeader = {
-  "typ": "JWT",
-  "alg": "HS512"
+  typ: 'JWT',
+  alg: 'HS512'
 };
 
 
 const rsa256Header: IJwtHeader = {
-  "typ": "JWT",
-  "alg": "RS256"
+  typ: 'JWT',
+  alg: 'RS256'
 };
 
 const rsa384Header: IJwtHeader = {
-  "typ": "JWT",
-  "alg": "RS384"
+  typ: 'JWT',
+  alg: 'RS384'
 };
 
 const rsa512Header: IJwtHeader = {
-  "typ": "JWT",
-  "alg": "RS512"
+  typ: 'JWT',
+  alg: 'RS512'
 };
 
 
@@ -99,7 +99,7 @@ const smallPayLoad: IJwtStdPayload = {
   sub: 'a',
 };
 
-const roles: Array<string> = ['admin','user'];
+const roles: Array<string> = ['admin', 'user'];
 const claims = {
   roles: roles,
   accessToken: 'secretaccesstoken',
@@ -117,12 +117,12 @@ const hmac384Token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzM4NCJ9.eyJpYXQiOjE1NjgzOTQyN
 const hmac512Token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE1NjgzOTQyNzUsImV4cCI6MTU2ODM5Nzg3NSwiaXNzIjoiWkhBVyIsImF1ZCI6IkFTRTIiLCJzdWIiOiJhZG1pbiIsInJvbGVzIjpbImFkbWluIiwidXNlciJdLCJhY2Nlc3NUb2tlbiI6InNlY3JldGFjY2Vzc3Rva2VuIn0.EiIsWGjsTSpxtD0CBhQy4PxRr2ZcCkdVXR7OaV6-8dZp0jDBdjFxlwVFJ-X4hhZ8fcnb4L3LL1dR5-OCPEXJBA';
 
 
-function createRsaJwtToken(header: IJwtHeader, payLoad: IJwtStdPayload, claims): string {
-  return createToken(header, payLoad, claims, private1024TestKey, false);
+function createRsaJwtToken(jwtHeader: IJwtHeader, jwtPayLoad: IJwtStdPayload, jwtClaims): string {
+  return createToken(jwtHeader, jwtPayLoad, jwtClaims, private1024TestKey, false);
 }
 
-function createHmacJwtToken(header: IJwtHeader, payLoad: IJwtStdPayload, claims): string {
-  return createToken(header, payLoad, claims, sharedTestSecret, false);
+function createHmacJwtToken(jwtHeader: IJwtHeader, jwtPayLoad: IJwtStdPayload, jwtClaims): string {
+  return createToken(jwtHeader, jwtPayLoad, jwtClaims, sharedTestSecret, false);
 }
 
 function verifyRsaJwtToken(token: string): boolean {

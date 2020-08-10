@@ -7,7 +7,7 @@ import {Component} from '@angular/core';
 })
 export class AppComponent {
 
-  title: String = 'app works!';
+  title = 'app works!';
   auctionListTitle = 'this is an auction list (from variable)';
 
   onAuctionListTitleClicked(event: string): void {

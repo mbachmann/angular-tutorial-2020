@@ -20,8 +20,8 @@ describe('UserService', () => {
       ]
     });
     expectedResult = {};
-    service = TestBed.get(UserService);
-    httpMock = TestBed.get(HttpTestingController);
+    service = TestBed.inject(UserService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
@@ -29,7 +29,7 @@ describe('UserService', () => {
   });
 
   it('should be created', () => {
-    const service = TestBed.get(UserService);
+    // const service = TestBed.inject(UserService);
     expect(service).toBeTruthy();
   });
 
@@ -63,11 +63,14 @@ describe('UserService', () => {
   });
 
   it('should propagate not found response', () => {
-    service.getByName('user').subscribe(null, (_error: any) => {
-      expectedResult = _error.status;
-    });
+    service.getByName('user').subscribe(() => {
 
-    const req = httpMock.expectOne({ method: 'GET' });
+      }, (err) => {
+        expectedResult = err.status;
+      }
+    );
+
+    const req = httpMock.expectOne({method: 'GET'});
     req.flush('Invalid request parameters', {
       status: 404,
       statusText: 'Bad Request'

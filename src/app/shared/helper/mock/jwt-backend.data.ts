@@ -27,40 +27,40 @@ VPKdOY3FPPTrofDeWYVybMT7/3fcyP+L/CH4T7z9suw4c4FBB2SOso8CAwEAAQ==
 
 
 const hmacHeader: IJwtHeader = {
-  "typ": "JWT",
-  "alg": "HS256"
+  typ: 'JWT',
+  alg: 'HS256'
 };
 
 const rsaHeader: IJwtHeader = {
-  "typ": "JWT",
-  "alg": "RS256"
+  typ: 'JWT',
+  alg: 'RS256'
 };
 
 
-export function createRsaJwtToken(payLoad: IJwtStdPayload, claims) {
+export function createRsaJwtToken(payLoad: IJwtStdPayload, claims): string {
   return createToken(rsaHeader, payLoad, claims, privateKey);
 }
 
-export function createHmacJwtToken(payLoad: IJwtStdPayload, claims) {
+export function createHmacJwtToken(payLoad: IJwtStdPayload, claims): string {
   return createToken(hmacHeader, payLoad, claims, sharedSecret);
 }
 
 
-export function verifyRsaJwtToken(token: string) {
+export function verifyRsaJwtToken(token: string): boolean {
   return verifyToken(token, publicKey);
 }
 
-export function verifyHmacJwtToken(token: string) {
+export function verifyHmacJwtToken(token: string): boolean {
   return verifyToken(token, sharedSecret);
 }
 
-export function createTestToken(username: string) {
+export function createTestToken(username: string): string {
   const roles: Array<string> = username === 'admin' ? ['admin', 'user'] : ['user'];
   const payLoad: IJwtStdPayload = {
     iat: 0,
     exp: createExpiresDateTime(),
-    iss: "",
-    aud: "",
+    iss: '',
+    aud: '',
     sub: username,
   };
 
@@ -73,12 +73,12 @@ export function createTestToken(username: string) {
   // return token;
 }
 
-export function createTestRefreshToken(username: string) {
+export function createTestRefreshToken(username: string): string {
   const payLoad: IJwtStdPayload = {
     iat: 0,
     exp: createExpiresDateTime(),
-    iss: "",
-    aud: "",
+    iss: '',
+    aud: '',
     sub: username,
   };
   const claims = {
@@ -89,12 +89,12 @@ export function createTestRefreshToken(username: string) {
   // return token;
 }
 
-export function nowEpochSeconds() {
+export function nowEpochSeconds(): number {
   return Math.floor(new Date().getTime() / 1000);
 }
 
-export function createExpiresDateTime() {
-  const exp = (nowEpochSeconds() + (60 * 60)) * 1000
+export function createExpiresDateTime(): number {
+  const exp = (nowEpochSeconds() + (60 * 60)) * 1000;
   return Math.floor(new Date(exp).getTime() / 1000);
 }
 
@@ -113,7 +113,7 @@ export class MockUser {
 }
 
 
-export const mockAdmin: MockUser = {
+export const mockAdminData: MockUser = {
   id: 1,
   firstName: 'admin',
   lastName: 'admin',
@@ -127,7 +127,7 @@ export const mockAdmin: MockUser = {
   expires: createExpiresDateTime()
 };
 
-export const mockUser: MockUser = {
+export const mockUserData: MockUser = {
   id: 2,
   firstName: 'user',
   lastName: 'user',
@@ -151,14 +151,14 @@ export function createUser(mockUser: MockUser): User {
   user.email = mockUser.email;
   user.thresholdOpenPayment = mockUser.thresholdOpenPayment;
   user.locked = mockUser.locked;
-  if (mockUser.tokens) user.token = mockUser.tokens[mockUser.tokens.length - 1];
-  if (mockUser.refreshTokens) user.refreshToken = mockUser.refreshTokens[mockUser.refreshTokens.length - 1];
+  if (mockUser.tokens) { user.token = mockUser.tokens[mockUser.tokens.length - 1]; }
+  if (mockUser.refreshTokens) { user.refreshToken = mockUser.refreshTokens[mockUser.refreshTokens.length - 1]; }
   user.expires = mockUser.expires;
   return user;
 }
 
 export function createMockUser(user: User): MockUser {
-  const mockUser= new MockUser();
+  const mockUser = new MockUser();
   mockUser.id = user.id;
   mockUser.firstName = user.firstName;
   mockUser.lastName = user.lastName;

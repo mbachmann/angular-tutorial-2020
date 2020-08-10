@@ -15,6 +15,7 @@ export class AuthenticationService {
   private currentUserSubject: BehaviorSubject<User>;
   public currentUser: Observable<User>;
   private authApiUrl: string;
+  private refreshTokenTimeout;
 
   constructor(
     private browserStorageService: BrowserStorageService,
@@ -56,7 +57,7 @@ export class AuthenticationService {
   }
 
 
-  logout() {
+  logout(): void {
     // remove user from local storage and set current user to null
     this.browserStorageService.removeItem('currentUser');
     this.currentUserSubject.next(null);
@@ -64,17 +65,17 @@ export class AuthenticationService {
     // this.router.navigate(['/login']); // is needed after we have a login dialog
   }
 
-  getBasicAuthHeader(username: string, password: string) {
+  getBasicAuthHeader(username: string, password: string): string {
     return `Basic ${btoa(username + ':' + password)}`;
   }
 
-  refreshToken() {
+  refreshToken(): Observable<User> {
 
     const jwtToken = this.currentUserSubject.value.token;
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + jwtToken
+        Authorization: 'Bearer ' + jwtToken
       }), observe: 'response' as 'response'
     };
 
@@ -90,14 +91,14 @@ export class AuthenticationService {
         if (this.tokenService.verifyToken(user.token, user.publicKey)) {
           return this.saveUser(user);
         } else {
-          console.log('refresh token not successful')
+          console.log('refresh token not successful');
         }
       }));
   }
 
-  private refreshTokenTimeout;
 
-  private startRefreshTokenTimer() {
+
+  private startRefreshTokenTimer(): void {
 
     // set a timeout to refresh the token a minute before it expires
     const expires = new Date(this.currentUserValue.expires * 1000);
@@ -106,7 +107,7 @@ export class AuthenticationService {
     this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
   }
 
-  private stopRefreshTokenTimer() {
+  private stopRefreshTokenTimer(): void {
     clearTimeout(this.refreshTokenTimeout);
   }
 
@@ -120,7 +121,7 @@ export class AuthenticationService {
     return user;
   }
 
-  public extractTokenInfo(user: User) {
+  public extractTokenInfo(user: User): void {
     const jwt = this.tokenService.decodeToken(user.token);
     if (jwt instanceof Jwt) {
       user.expires = +JSON.stringify(jwt.getExpiration());

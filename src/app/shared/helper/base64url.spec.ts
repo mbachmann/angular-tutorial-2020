@@ -1,7 +1,7 @@
 import base64url from './base64url';
-import {Buffer} from "buffer";
+import {Buffer} from 'buffer';
 
-function base64(s) {
+function base64(s): string {
   return Buffer.from(s, 'binary').toString('base64');
 }
 
@@ -11,9 +11,10 @@ describe('Helper Base64Url', () => {
   let testBuffer: string;
 
   beforeEach(() => {
-    let array = new Array<string>(256);
-    for (let i = 0 ; i < 256 ; i++) array[i] = String.fromCharCode(i);
-    let prev = '';
+    const array = new Array<string>(256);
+    for (let i = 0 ; i < 256 ; i++) {
+      array[i] = String.fromCharCode(i);
+    }
     testBuffer = array.reduce((prev, curr) => {
         prev += curr;
         return prev;

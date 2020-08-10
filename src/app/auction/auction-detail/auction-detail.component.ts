@@ -2,9 +2,9 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AuctionDataService} from '../shared/auction-data.service';
 import {Subscription} from 'rxjs';
-import {Auction} from "../shared/auction";
-import {CURRENCY_STRING} from "../../app.constants";
-import {HelperService} from "../../shared/helper/helper.service";
+import {Auction} from '../shared/auction';
+import {CURRENCY_STRING} from '../../app.constants';
+import {HelperService} from '../../shared/helper/helper.service';
 
 @Component({
   selector: 'app-auction-detail',
@@ -25,9 +25,9 @@ export class AuctionDetailComponent implements OnInit, OnDestroy {
 
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.routeSubscription = this.route.params.subscribe(params => {
-      console.log(params['id']);
+      // console.log(params['id']);
       this.subscription = this.auctionDataService.getHttpAuction(params['id']).subscribe(
         auction => {
           this.auction = auction;
@@ -40,7 +40,7 @@ export class AuctionDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
 
     if (this.routeSubscription != null) {
       this.routeSubscription.unsubscribe();
@@ -56,11 +56,11 @@ export class AuctionDetailComponent implements OnInit, OnDestroy {
     return (date.toLocaleString(undefined, {hour12: false}));
   }
 
-  tick(interval) {
+  tick(interval): void {
     this.computeTimeLeft();
   }
 
-  adjustDate() {
+  adjustDate(): void {
     const currentTime = new Date();
     this.auction.endDateTime = new Date(currentTime.valueOf() + 100000);
     this.auction.startDateTime = new Date();
@@ -89,8 +89,8 @@ export class AuctionDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    let timeLeft: string = this.helperService.computeTimeLeft(this.auction.endDateTime);
-    if (timeLeft == '0') {
+    const timeLeft: string = this.helperService.computeTimeLeft(this.auction.endDateTime);
+    if (timeLeft === '0') {
       return 'Auction has ended';
     }
     return timeLeft;
@@ -113,15 +113,15 @@ export class AuctionDetailComponent implements OnInit, OnDestroy {
     return CURRENCY_STRING;
   }
 
-  onContainerClick() {
+  onContainerClick(): void {
     this.router.navigate(['/auctions/' + this.auction.id]);
   }
 
-  onFocusInBid() {
+  onFocusInBid(): void {
     this.isFocusBid = true;
   }
 
-  onFocusOutBid() {
+  onFocusOutBid(): void {
     this.isFocusBid = false;
   }
 }

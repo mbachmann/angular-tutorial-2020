@@ -18,7 +18,7 @@ describe('AuctionDataService', () => {
   }));
 
   it('should be created', () => {
-    const service: AuctionDataService = TestBed.get(AuctionDataService);
+    const service: AuctionDataService = TestBed.inject(AuctionDataService);
     expect(service).toBeTruthy();
   });
 });

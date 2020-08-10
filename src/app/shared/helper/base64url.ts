@@ -1,4 +1,4 @@
-import {Buffer} from "buffer";
+import {Buffer} from 'buffer';
 
 /**
  * encode data from string or a Butter with a default encoding of utf8 to
@@ -8,35 +8,35 @@ import {Buffer} from "buffer";
  * @param input the input data
  * @param encoding default utf8
  */
-function encode(input: string | Buffer, encoding: BufferEncoding = "utf8"): string {
+function encode(input: string | Buffer, encoding: BufferEncoding = 'utf8'): string {
   if (Buffer.isBuffer(input)) {
-    return fromBase64(input.toString("base64"));
+    return fromBase64(input.toString('base64'));
   }
-  return fromBase64(Buffer.from(input as string, encoding).toString("base64"));
+  return fromBase64(Buffer.from(input as string, encoding).toString('base64'));
 }
 
-function decode(base64url: string, encoding: string = "utf8"): string {
-  return Buffer.from(toBase64(base64url), "base64").toString(encoding);
+function decode(base64Url: string, encoding: string = 'utf8'): string {
+  return Buffer.from(toBase64(base64Url), 'base64').toString(encoding);
 }
 
-function toBase64(base64url: string | Buffer): string {
+function toBase64(base64Url: string | Buffer): string {
   // We this to be a string so we can do .replace on it. If it's
   // already a string, this is a noop.
-  base64url = base64url.toString();
-  return padString(base64url)
-    .replace(/\-/g, "+")
-    .replace(/_/g, "/");
+  base64Url = base64Url.toString();
+  return padString(base64Url)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
 }
 
 function fromBase64(base64: string): string {
   return base64
-    .replace(/=/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
 }
 
-function toBuffer(base64url: string): Buffer {
-  return Buffer.from(toBase64(base64url), "base64");
+function toBuffer(base64Url: string): Buffer {
+  return Buffer.from(toBase64(base64Url), 'base64');
 }
 
 function fromString(str: string): string {
@@ -57,7 +57,7 @@ export interface Base64Url {
   fromString(str: string): string;
 }
 
-let base64url = encode as Base64Url;
+const base64url = encode as Base64Url;
 
 base64url.encode = encode;
 base64url.decode = decode;
@@ -69,9 +69,9 @@ base64url.fromString = fromString;
 export default base64url;
 
 function padString(input: string): string {
-  let segmentLength = 4;
-  let stringLength = input.length;
-  let diff = stringLength % segmentLength;
+  const segmentLength = 4;
+  const stringLength = input.length;
+  const diff = stringLength % segmentLength;
 
   if (!diff) {
     return input;
@@ -79,13 +79,13 @@ function padString(input: string): string {
 
   let position = stringLength;
   let padLength = segmentLength - diff;
-  let paddedStringLength = stringLength + padLength;
-  let buffer = Buffer.alloc(paddedStringLength);
+  const paddedStringLength = stringLength + padLength;
+  const buffer = Buffer.alloc(paddedStringLength);
 
   buffer.write(input);
 
   while (padLength--) {
-    buffer.write("=", position++);
+    buffer.write('=', position++);
   }
 
   return buffer.toString();

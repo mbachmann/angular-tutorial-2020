@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {Auction} from './auction';
 import {AUCTION_DATA} from './auction-data';
 import {Observable, of} from 'rxjs';
-import {HttpClient} from "@angular/common/http";
+import {HttpClient} from '@angular/common/http';
 
 
 
@@ -12,11 +12,11 @@ import {HttpClient} from "@angular/common/http";
 export class AuctionDataService {
 
   private auctions: Auction[] = AUCTION_DATA;
-  private URL='http://localhost:4730/auctions';
+  private URL = 'http://localhost:4730/auctions';
 
   constructor(private httpClient: HttpClient) {}
 
-  public getAuctions() {
+  public getAuctions(): Auction[] {
     return this.auctions;
   }
 

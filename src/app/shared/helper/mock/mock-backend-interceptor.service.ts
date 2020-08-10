@@ -14,7 +14,7 @@ import {
   createMockUser,
   createRsaJwtToken,
   createTestRefreshToken,
-  createTestToken, createUser, mockAdmin, MockUser, mockUser, nowEpochSeconds,
+  createTestToken, createUser, mockAdminData, MockUser, mockUserData, nowEpochSeconds,
   publicKey,
   verifyRsaJwtToken
 } from './jwt-backend.data';
@@ -40,10 +40,10 @@ import {User} from '../../model/user';
 const usersKey = 'users';
 // const users = JSON.parse(localStorage.getItem(usersKey)) || [];
 
-const users = [];
-users.push(mockAdmin);
-users.push(mockUser);
-localStorage.setItem(usersKey, JSON.stringify(users));
+const usersData = [];
+usersData.push(mockAdminData);
+usersData.push(mockUserData);
+localStorage.setItem(usersKey, JSON.stringify(usersData));
 
 
 @Injectable()
@@ -51,8 +51,8 @@ export class MockBackendInterceptor implements HttpInterceptor {
 
   /**
    * Overwritten method of HttpInterceptor
-   * @param request
-   * @param next
+   * @param request the HttpRequest
+   * @param next the next Handler
    */
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const {url, method, headers, body} = request;
@@ -66,8 +66,8 @@ export class MockBackendInterceptor implements HttpInterceptor {
         next: data => {
           console.log('mockResponse', data);
         },
-        error: error => {
-          console.log('mockResponse', JSON.stringify(error));
+        error: err => {
+          console.log('mockResponse', JSON.stringify(err));
         },
         complete: () => console.log('mockResponse: on complete')
       }));
@@ -76,7 +76,7 @@ export class MockBackendInterceptor implements HttpInterceptor {
      * The handle route function is used to individually support the
      * different end points
      */
-    function handleRoute() {
+    function handleRoute(): Observable<HttpEvent<any>> {
       console.log('mockRequest: ' + url, method, headers, body);
       let response: Observable<HttpEvent<any>>;
 
@@ -91,7 +91,7 @@ export class MockBackendInterceptor implements HttpInterceptor {
           break;
 
         case url.endsWith('/users/refresh_token') && method === 'POST':
-          response = refreshToken();
+          response = refreshTheToken();
           break;
 
         case url.endsWith('/users') && method === 'GET':
@@ -99,8 +99,12 @@ export class MockBackendInterceptor implements HttpInterceptor {
           break;
 
         case url.match(/(\/users[\/])/) && method === 'GET':
-          if (isNumber(nameFromUrl())) response = getUser();
-          else response = getUserByName();
+          if (isNumber(nameFromUrl())) {
+            response = getUser();
+          }
+          else {
+            response = getUserByName();
+          }
           break;
 
         case url.match(/\/users\/\d+$/) && method === 'DELETE':
@@ -134,9 +138,9 @@ export class MockBackendInterceptor implements HttpInterceptor {
 
     // --- route functions ---
 
-    function authenticate() {
+    function authenticate(): Observable<HttpResponse<unknown>> {
       const {username, password} = body;
-      let mockUsers: Array<MockUser> = JSON.parse(localStorage.getItem(usersKey)) || [];
+      const mockUsers: Array<MockUser> = JSON.parse(localStorage.getItem(usersKey)) || [];
       const mockUser: MockUser = mockUsers.find(x => x.username === username && x.password === password);
       if (!mockUser) {
         return notFound('Username or password is incorrect');
@@ -153,12 +157,12 @@ export class MockBackendInterceptor implements HttpInterceptor {
       }
     }
 
-    function register() {
+    function register(): Observable<HttpResponse<unknown>> {
       const user = body;
-      let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
+      const mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
 
       if (mockUsers.find(x => x.username === user.username)) {
-        return error('Username "' + user.username + '" is already taken')
+        return error('Username "' + user.username + '" is already taken');
       }
       user.id = mockUsers.length ? Math.max(...mockUsers.map(x => x.id)) + 1 : 1;
       const mockUser: MockUser = createMockUser(user);
@@ -170,14 +174,14 @@ export class MockBackendInterceptor implements HttpInterceptor {
       return ok(user, responseHeaders);
     }
 
-    function refreshToken() {
-      if (!isLoggedIn()) return unauthorized();
-      if (!isTokenExpired()) return expired();
+    function refreshTheToken(): Observable<HttpResponse<unknown>> {
+      if (!isLoggedIn()) { return unauthorized(); }
+      if (!isTokenExpired()) { return expired(); }
 
       const {username, refreshToken} = body;
-      if (!isRefreshTokenExpired(refreshToken)) return expired();
+      if (!isRefreshTokenExpired(refreshToken)) { return expired(); }
 
-      let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
+      const mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
       const mockUser: MockUser = mockUsers.find(x => x.username === username);
 
       if (!mockUser) {
@@ -202,155 +206,156 @@ export class MockBackendInterceptor implements HttpInterceptor {
       }
     }
 
-    function getUsers() {
-      if (!isLoggedIn()) return unauthorized();
-      if (!isTokenExpired()) return expired();
-      if (!isInRole('admin')) return notInRole();
+    function getUsers(): Observable<HttpResponse<unknown>> {
+      if (!isLoggedIn()) { return unauthorized(); }
+      if (!isTokenExpired()) { return expired(); }
+      if (!isInRole('admin')) { return notInRole(); }
 
-      let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
-      if (!isLoggedIn()) return unauthorized();
+      const mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
+      if (!isLoggedIn()) { return unauthorized(); }
 
       const users = [];
-      mockUsers.forEach(mockUser => users.push(createUser(mockUser)))
+      mockUsers.forEach(mockUser => users.push(createUser(mockUser)));
       return ok(users);
     }
 
-    function getUser() {
-      if (!isLoggedIn()) return unauthorized();
+    function getUser(): Observable<HttpResponse<unknown>> {
+      if (!isLoggedIn()) { return unauthorized(); }
       let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
       mockUsers = mockUsers.filter(x => x.id === idFromUrl());
       if (mockUsers.length > 0) {
         return ok(createUser(mockUsers[0]));
       } else {
-        return noContent('User with id ' + idFromUrl() + ' not found.')
+        return noContent('User with id ' + idFromUrl() + ' not found.');
       }
     }
 
-    function getUserByName() {
-      if (!isLoggedIn()) return unauthorized();
+    function getUserByName(): Observable<HttpResponse<unknown>> {
+      if (!isLoggedIn()) { return unauthorized(); }
       let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
       mockUsers = mockUsers.filter(x => x.username === nameFromUrl());
       if (mockUsers.length > 0) {
         return ok(createUser(mockUsers[0]));
       } else {
-        return noContent('User with name ' + nameFromUrl() + ' not found.')
+        return noContent('User with name ' + nameFromUrl() + ' not found.');
       }
     }
-    function deleteUser() {
-      if (!isLoggedIn()) return unauthorized();
+
+    function deleteUser(): Observable<HttpResponse<unknown>>  {
+      if (!isLoggedIn()) { return unauthorized(); }
       let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
       mockUsers = mockUsers.filter(x => x.id !== idFromUrl());
       localStorage.setItem(usersKey, JSON.stringify(mockUsers));
       return ok();
     }
 
-    function changeUser() {
-      if (!isLoggedIn()) return unauthorized();
+    function changeUser(): Observable<HttpResponse<unknown>> {
+      if (!isLoggedIn()) { return unauthorized(); }
       const user = body;
-      if (!user.id) user.id = idFromUrl();
+      if (!user.id) { user.id = idFromUrl(); }
       let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
       mockUsers = mockUsers.filter(x => x.id === idFromUrl());
       if (mockUsers.length > 0) {
         // delete this user
-        let mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
+        mockUsers = JSON.parse(localStorage.getItem(usersKey)) || [];
         mockUsers = mockUsers.filter(x => x.id !== idFromUrl());
         // add changed user
         mockUsers.push(user);
         localStorage.setItem(usersKey, JSON.stringify(mockUsers));
         return ok(user);
       } else {
-        return noContent('User with id ' + idFromUrl() + ' not found.')
+        return noContent('User with id ' + idFromUrl() + ' not found.');
       }
     }
 
-    function getAuctions() {
+    function getAuctions(): Observable<HttpResponse<unknown>> {
       return ok(AUCTION_DATA);
     }
 
-    function getAuction() {
-      let auctions = AUCTION_DATA.filter(x => x.id === idFromUrl());
+    function getAuction(): Observable<HttpResponse<unknown>> {
+      const auctions = AUCTION_DATA.filter(x => x.id === idFromUrl());
       if (auctions.length > 0) {
         return ok(auctions[0]);
       } else {
-        return noContent('Auction item with id ' + idFromUrl() + ' not found.')
+        return noContent('Auction item with id ' + idFromUrl() + ' not found.');
       }
     }
 
 
     // helper functions
 
-    function ok(body?, headers?: HttpHeaders) {
-      const resp = new HttpResponse({body: body, headers: headers, status: 200});
+    function ok(httpBody?, httpHeaders?: HttpHeaders): Observable<HttpResponse<unknown>> {
+      const resp = new HttpResponse({body: httpBody, headers: httpHeaders, status: 200});
       return of(new HttpResponse(resp));
     }
 
-    function error(message) {
+    function error(message): Observable<HttpResponse<unknown>> {
       const resp = new HttpResponse({body: message, headers: headers, status: 404});
       return of(new HttpResponse(resp));
     }
 
-    function unauthorized() {
+    function unauthorized(): Observable<HttpResponse<unknown>> {
       const resp = new HttpResponse({body: 'Unauthorised', headers: headers, status: 401});
       return of(new HttpResponse(resp));
     }
 
-    function expired() {
+    function expired(): Observable<HttpResponse<unknown>> {
       const resp = new HttpResponse({body: 'Unauthorised - Token expired', headers: headers, status: 401});
       return of(new HttpResponse(resp));
     }
 
-    function notInRole() {
+    function notInRole(): Observable<HttpResponse<unknown>> {
       const resp = new HttpResponse({body: 'Forbidden - not correct role', headers: headers, status: 403});
       return of(new HttpResponse(resp));
     }
 
-    function notFound(message) {
+    function notFound(message): Observable<HttpResponse<unknown>> {
       const resp = new HttpResponse({body: message, headers: headers, status: 404});
       return of(new HttpResponse(resp));
     }
 
-    function noContent(message) {
+    function noContent(message): Observable<HttpResponse<unknown>> {
       const resp = new HttpResponse({body: message, headers: headers, status: 204});
       return of(new HttpResponse(resp));
     }
 
 
-    function isLoggedIn() {
+    function isLoggedIn(): boolean {
       const bearerToken = headers.get('Authorization');
       if (bearerToken && bearerToken.slice(0, 7) === 'Bearer ') {
         const jwtToken = bearerToken.slice(7, bearerToken.length);
         try {
-          if (verifyRsaJwtToken(jwtToken)) return true;
+          if (verifyRsaJwtToken(jwtToken)) { return true; }
         } catch (e) {
           if (e instanceof Error) {
             throwError({status: 401, error: {message: 'Unauthorised - Token invalid'}});
           }
         }
       }
-      return (headers.get('Authorization') === 'Bearer fake-jwt-token')
+      return (headers.get('Authorization') === 'Bearer fake-jwt-token');
     }
 
-    function isTokenExpired() {
+    function isTokenExpired(): boolean {
       const bearerToken = headers.get('Authorization');
       if (bearerToken && bearerToken.slice(0, 7) === 'Bearer ') {
         const jwtToken = bearerToken.slice(7, bearerToken.length);
         const token = decodeToken(jwtToken);
         if (token instanceof Jwt) {
-          if (token.body.exp >= nowEpochSeconds()) return true;
+          if (token.body.exp >= nowEpochSeconds()) { return true; }
         }
       }
       return false;
     }
 
-    function isRefreshTokenExpired(refreshToken: string) {
+    function isRefreshTokenExpired(refreshToken: string): boolean {
       const token = decodeToken(refreshToken);
       if (token instanceof Jwt) {
-        if (token.body.exp >= nowEpochSeconds()) return true;
+        if (token.body.exp >= nowEpochSeconds()) { return true; }
       }
       return false;
     }
 
-    function isInRole(role) {
+    function isInRole(role): boolean {
       const bearerToken = headers.get('Authorization');
       if (bearerToken && bearerToken.slice(0, 7) === 'Bearer ') {
         const jwtToken = bearerToken.slice(7, bearerToken.length);
@@ -358,18 +363,18 @@ export class MockBackendInterceptor implements HttpInterceptor {
         if (token instanceof Jwt && token.body['roles']) {
           const roles: Array<string> = token.body['roles'];
           console.log('roles', roles, role);
-          if (roles.indexOf(role) > -1) return true;
+          if (roles.indexOf(role) > -1) { return true; }
         }
       }
       return false;
     }
 
-    function idFromUrl() {
+    function idFromUrl(): number {
       const urlParts = url.split('/');
-      return parseInt(urlParts[urlParts.length - 1]);
+      return parseInt(urlParts[urlParts.length - 1], 10);
     }
 
-    function nameFromUrl() {
+    function nameFromUrl(): string {
       const urlParts = url.split('/');
       return urlParts[urlParts.length - 1];
     }
@@ -390,20 +395,20 @@ export class MockBackendInterceptor implements HttpInterceptor {
     }
 
 
-    function addTokenToHeader(headers: HttpHeaders, token: string): HttpHeaders {
-      return addItemToHeader(headers, 'Authorization', `Bearer ${token}`);
+    function addTokenToHeader(httpHeaders: HttpHeaders, token: string): HttpHeaders {
+      return addItemToHeader(httpHeaders, 'Authorization', `Bearer ${token}`);
     }
 
-    function addContentTypeToHeader(headers: HttpHeaders): HttpHeaders {
-      return addItemToHeader(headers, 'Content-Type', 'application/json');
+    function addContentTypeToHeader(httpHeaders: HttpHeaders): HttpHeaders {
+      return addItemToHeader(httpHeaders, 'Content-Type', 'application/json');
     }
 
-    function addAcceptToHeader(headers: HttpHeaders): HttpHeaders {
-      return addItemToHeader(headers, 'Accept', 'application/json');
+    function addAcceptToHeader(httpHeaders: HttpHeaders): HttpHeaders {
+      return addItemToHeader(httpHeaders, 'Accept', 'application/json');
     }
 
-    function addItemToHeader(headers: HttpHeaders, key: string, item: string): HttpHeaders {
-      return headers.append(key, item);
+    function addItemToHeader(httpHeaders: HttpHeaders, key: string, item: string): HttpHeaders {
+      return httpHeaders.append(key, item);
     }
 
     function isNumber(value: string | number): boolean {

@@ -46,14 +46,14 @@ describe('AuthenticationService', () => {
   );
 
   it('should authenticate an admin', (done) => {
-    service.login('admin','admin').subscribe(
+    service.login('admin', 'admin').subscribe(
       (data) => {
         console.log('authenticateResponse', data, service.currentUserValue);
         expect(service.currentUserValue.username).toBe('admin');
         // use the same service for further tests
         singletonService = service;
         checkTheTokens();
-        checkTheRoles(['admin','user']);
+        checkTheRoles(['admin', 'user']);
         checkCurrentUserStoreExist();
         done();
       },
@@ -76,7 +76,7 @@ describe('AuthenticationService', () => {
         const newRefreshToken = singletonService.currentUserValue.refreshToken;
         expect(newRefreshToken).not.toEqual(oldRefreshToken);
         checkTheTokens();
-        checkTheRoles(['admin','user']);
+        checkTheRoles(['admin', 'user']);
         checkCurrentUserStoreExist();
         done();
       },
@@ -91,21 +91,21 @@ describe('AuthenticationService', () => {
   });
 
   it('should logout', (done) => {
-    singletonService.logout()
+    singletonService.logout();
     expect(singletonService.currentUserValue).toBeNull();
     checkCurrentUserStoreNotExist();
     done();
   });
 
-  function checkCurrentUserStoreExist() {
+  function checkCurrentUserStoreExist(): void {
      expect(localStorage.getItem('currentUser')).toBeTruthy();
   }
 
-  function checkCurrentUserStoreNotExist() {
+  function checkCurrentUserStoreNotExist(): void {
     expect(localStorage.getItem('currentUser')).toBeFalsy();
   }
 
-  function checkTheTokens() {
+  function checkTheTokens(): void {
 
     const refreshToken = decodeToken(singletonService.currentUserValue.refreshToken);
     if (refreshToken instanceof Jwt) {
@@ -119,7 +119,7 @@ describe('AuthenticationService', () => {
     }
   }
 
-  function checkTheRoles(checkRoles: Array<string> ) {
+  function checkTheRoles(checkRoles: Array<string>): void {
     singletonService.currentUserValue.roles.forEach(role => {
       expect(checkRoles.includes(role)).toBeTrue();
     });

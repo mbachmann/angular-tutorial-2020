@@ -22,7 +22,7 @@ export class AuctionListComponent implements OnInit, OnDestroy {
     // this.auctions = auctionDataService.getAuctions();
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.auctionsObservable = this.auctionDataService.getHttpAuctions();
     this.auctionSubscription = this.auctionsObservable.subscribe(data => this.auctions = data);
   }
@@ -31,7 +31,7 @@ export class AuctionListComponent implements OnInit, OnDestroy {
     this.titleClicked.emit('Title clicked' + event.type);
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.auctionSubscription.unsubscribe();
   }
 

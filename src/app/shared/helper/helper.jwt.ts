@@ -1,4 +1,4 @@
-import * as uuid from "uuid";
+import * as uuid from 'uuid';
 import {Buffer} from 'buffer';
 import * as forge from 'node-forge';
 import {pki} from 'node-forge';
@@ -12,6 +12,7 @@ import base64url, {Base64Url} from './base64url';
  * @param payload    the standard claims to jwt
  * @param claims     the project specific claims
  * @param signingKey private key or shared secret
+ * @param enforceFields recreate the fields
  */
 export function createToken(header: IJwtHeader, payload: IJwtStdPayload, claims: any, signingKey: string, enforceFields = true): string {
   const union = {...payload, ...claims};
@@ -22,7 +23,7 @@ export function createToken(header: IJwtHeader, payload: IJwtStdPayload, claims:
 
 /**
  * Decodes a token based and returns a Jwt object. The signature is NOT verified.
- * @param token
+ * @param token the Token
  */
 export function decodeToken(token: string): Jwt | JwtParseError {
   return new JwtParser().parse(token);
@@ -30,8 +31,8 @@ export function decodeToken(token: string): Jwt | JwtParseError {
 
 /**
  * Verifies the token signature
- * @param token
- * @param key
+ * @param token the Token
+ * @param key the Public Key
  */
 export function verifyToken(token: string, key: string): boolean {
 
@@ -45,19 +46,19 @@ export function verifyToken(token: string, key: string): boolean {
 
 /**
  * Encrypt a message with symemtric aes algorithm
- * @param message
- * @param secret
+ * @param message the message to encrypt
+ * @param secret the secret
  */
-export function encrypt(message: string, secret: string) {
+export function encrypt(message: string, secret: string): string {
   return CryptoJS.AES.encrypt(message, secret).toString();
 }
 
 /**
  * Decrypt a message with symmetric aes algorithm
- * @param message
- * @param secret
+ * @param message the message to decrypt
+ * @param secret the secret
  */
-export function decrypt(message: string, secret: string) {
+export function decrypt(message: string, secret: string): string {
   const bytes = CryptoJS.AES.decrypt(message, secret);
   return bytes.toString(CryptoJS.enc.Utf8);
 }
@@ -76,7 +77,7 @@ export function createKeyPair(bits: number): pki.rsa.KeyPair {
  */
 export interface IJwtHeader {
   typ: string;
-  alg: string
+  alg: string;
 }
 
 /**
@@ -110,33 +111,32 @@ const algCryptoMap = {
  */
 
 const properties = {
-  "errors": {
-    "PARSE_ERROR": "Jwt cannot be parsed",
-    "EXPIRED": "Jwt is expired",
-    "UNSUPPORTED_SIGNING_ALG": "Unsupported signing algorithm",
-    "SIGNING_KEY_REQUIRED": "Signing key is required",
-    "PUBLIC_KEY_REQUIRED": "Signing key is required",
-    "SIGNATURE_MISMTACH": "Signature verification failed",
-    "SIGNATURE_ALGORITHM_MISMTACH": "Unexpected signature algorithm",
-    "NOT_ACTIVE": "Jwt not active",
-    "KEY_RESOLVER_ERROR": "Error while resolving signing key for kid \"%s\""
+  errors: {
+    PARSE_ERROR: 'Jwt cannot be parsed',
+    EXPIRED: 'Jwt is expired',
+    UNSUPPORTED_SIGNING_ALG: 'Unsupported signing algorithm',
+    SIGNING_KEY_REQUIRED: 'Signing key is required',
+    PUBLIC_KEY_REQUIRED: 'Signing key is required',
+    SIGNATURE_MISMATCH: 'Signature verification failed',
+    SIGNATURE_ALGORITHM_MISMATCH: 'Unexpected signature algorithm',
+    NOT_ACTIVE: 'Jwt not active',
+    KEY_RESOLVER_ERROR: 'Error while resolving signing key for kid \"%s\"'
   }
 };
 
 /**
- * base64 encoder for the rsa signature
- * @param str
+ * sigBase64EncodeUrl encoder for the rsa signature
+ * @param str the string to encode
  */
-function sigBase64EncodeUrl(str) {
+function sigBase64EncodeUrl(str: string): string {
   return base64url.fromBase64(str);
 }
 
 /**
  * Base64 encoder for body and header
- * @param data
+ * @param data the data to encode
  */
-
-function base64urlEncode(data) {
+function base64urlEncode(data: string | number): string {
 
   const str = typeof data === 'number' ? data.toString() : data;
   return base64url.fromString(str);
@@ -216,47 +216,48 @@ export class Jwt {
     }
   }
 
-  nowEpochSeconds() {
+  nowEpochSeconds(): number {
     return Math.floor(new Date().getTime() / 1000);
   }
 
-  setClaim(claim, value) {
+  setClaim(claim, value): Jwt {
     this.body[claim] = value;
     return this;
   }
 
-  setHeader(param, value) {
+  setHeader(param, value): Jwt {
     this.header[param] = value;
     return this;
   }
 
-  setJti(jti) {
+  setJti(jti): Jwt {
     this.body.jti = jti;
     return this;
   }
 
-  setSubject(sub) {
+  setSubject(sub): Jwt {
     this.body.sub = sub;
     return this;
   }
 
-  setIssuer(iss) {
+  setIssuer(iss): Jwt {
     this.body.iss = iss;
     return this;
   }
 
-  setIssuedAt(iat) {
+  setIssuedAt(iat): Jwt {
     this.body.iat = iat;
     return this;
   }
 
-  setExpiration(exp) {
+  setExpiration(exp): Jwt {
     if (exp) {
       this.body.exp = Math.floor((exp instanceof Date ? exp : new Date(exp)).getTime() / 1000);
     }
+    return this;
   }
 
-  getExpiration() {
+  getExpiration(): number {
     return this.body.exp;
   }
 
@@ -266,17 +267,18 @@ export class Jwt {
     return date;
   }
 
-  setNotBefore(nbf) {
+  setNotBefore(nbf): Jwt {
     if (nbf) {
       this.body.nbf = Math.floor((nbf instanceof Date ? nbf : new Date(nbf)).getTime() / 1000);
     }
+    return this;
   }
 
-  isSupportedAlg(alg) {
+  isSupportedAlg(alg): boolean {
     return !!algCryptoMap[alg];
   }
 
-  setSigningAlgorithm(alg) {
+  setSigningAlgorithm(alg): Jwt {
     if (!this.isSupportedAlg(alg)) {
       throw new JwtError(properties.errors.UNSUPPORTED_SIGNING_ALG);
     }
@@ -284,20 +286,22 @@ export class Jwt {
     return this;
   }
 
-  isExpired() {
+  isExpired(): boolean {
     return new Date(this.body.exp * 1000) < new Date();
   }
 
-  isNotBefore() {
+  isNotBefore(): boolean {
     return new Date(this.body.nbf * 1000) >= new Date();
   }
 
-  setSigningKey(privateKEY: string) {
+  setSigningKey(privateKEY: string): Jwt {
     this.signingKey = privateKEY;
+    return this;
   }
 
-  setPublicKey(publicKEY: string) {
+  setPublicKey(publicKEY: string): Jwt {
     this.publicKey = publicKEY;
+    return this;
   }
 
   /**
@@ -307,8 +311,8 @@ export class Jwt {
    * @param algorithm HMAC or RAS algorithm
    * @param cryptoInput  privateKey of sharedSecret
    */
-  private sign(payload, algorithm, cryptoInput) {
-    let buffer;
+  private sign(payload, algorithm, cryptoInput): string {
+    let buffer: string;
 
     const cryptoAlgName = algCryptoMap[algorithm];
     const signingType = this.algTypeMap[algorithm];
@@ -349,9 +353,9 @@ export class Jwt {
     return buffer;
   }
 
-  private hmacBase64url(source) {
+  private hmacBase64url(source): string {
     // Encode in classical base64
-    let base64 = CryptoJS.enc.Base64.stringify(source);
+    const base64 = CryptoJS.enc.Base64.stringify(source);
     return base64url.fromBase64(base64);
   }
 
@@ -360,7 +364,7 @@ export class Jwt {
    */
   getSignedToken(): string {
 
-    var segments = [];
+    const segments = [];
     segments.push(this.header.compact());
     segments.push(this.body.compact());
 
@@ -382,7 +386,9 @@ export class Jwt {
    */
   verifySignature(): boolean {
 
-    if (this.publicKey === 'undefined' || this.publicKey === '') throw new Error(properties.errors.PUBLIC_KEY_REQUIRED);
+    if (this.publicKey === 'undefined' || this.publicKey === '') {
+      throw new Error(properties.errors.PUBLIC_KEY_REQUIRED);
+    }
     const signingType = this.algTypeMap[this.header.alg];
     if (signingType === 'hmac') {
       return (this.signature === this.sign(this.verificationInput, this.header.alg, this.publicKey));
@@ -404,7 +410,9 @@ export class Jwt {
 
       const decodedSignature = base64url.toBase64(this.signature);
       return publicKey.verify(md.digest().bytes(), atob(decodedSignature));
-    } else throw new Error(properties.errors.SIGNATURE_ALGORITHM_MISMTACH);
+    } else {
+      throw new Error(properties.errors.SIGNATURE_ALGORITHM_MISMATCH);
+    }
   }
 }
 
@@ -415,8 +423,8 @@ export class Jwt {
 
 export class JwtParser {
 
-  private safeJsonParse(input: any) {
-    let result;
+  private safeJsonParse(input: any): any {
+    let result: string;
     try {
       result = JSON.parse(Buffer.from(base64url.toBase64(input), 'base64').toString());
     } catch (e) {
@@ -429,17 +437,17 @@ export class JwtParser {
    * parse is creating a Jwt token class
    * @param jwtString the encoded 3-parts jwt token
    */
-  parse(jwtString) {
+  parse(jwtString): Jwt | JwtParseError {
 
-    let segments = jwtString.split('.');
+    const segments = jwtString.split('.');
     let signature;
 
     if (segments.length < 2 || segments.length > 3) {
       return new JwtParseError(properties.errors.PARSE_ERROR);
     }
 
-    let header = this.safeJsonParse(segments[0]);
-    let body = this.safeJsonParse(segments[1]);
+    const header = this.safeJsonParse(segments[0]);
+    const body = this.safeJsonParse(segments[1]);
 
     if (segments[2]) {
       signature = segments[2];
@@ -451,7 +459,7 @@ export class JwtParser {
     if (body instanceof Error) {
       return new JwtParseError(properties.errors.PARSE_ERROR);
     }
-    var jwt = new Jwt(header, body, false);
+    const jwt = new Jwt(header, body, false);
     jwt.setSigningAlgorithm(header.alg);
     jwt.signature = signature;
     jwt.verificationInput = segments[0] + '.' + segments[1];
@@ -477,17 +485,17 @@ class JwtBody implements IJwtStdPayload {
   jti?: string; // JWT ID): Unique identifier;
 
   constructor(claims) {
-    var self = this;
+    const self = this;
     if (claims) {
-      Object.keys(claims).forEach(function (k) {
+      Object.keys(claims).forEach((k)  => {
         self[k] = claims[k];
       });
     }
   }
 
-  toJSON() {
+  toJSON(): any {
 
-    let acc = {};
+    const acc = {};
     Object.keys(this).forEach(key => {
 
       if (typeof (this[key]) !== 'undefined' && this[key] !== '') {
@@ -498,7 +506,7 @@ class JwtBody implements IJwtStdPayload {
     return acc;
   }
 
-  compact() {
+  compact(): string {
     return base64urlEncode(JSON.stringify(this));
   }
 
@@ -519,8 +527,8 @@ class JwtHeader implements IJwtHeader {
     this.alg = header && header.alg || 'HS256';
   }
 
-  compact() {
+  compact(): string {
     return base64urlEncode(JSON.stringify(this));
-  };
+  }
 
 }

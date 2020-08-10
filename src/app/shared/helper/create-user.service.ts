@@ -12,7 +12,7 @@ export class CreateUserService {
   ) {
   }
 
-  private registerUser(user: User) {
+  private registerUser(user: User): void {
 
     this.userService.register(user)
       .pipe(first())
@@ -22,13 +22,13 @@ export class CreateUserService {
       );
   }
 
-  checkAndRegisterUser(userName) {
+  checkAndRegisterUser(userName): void {
 
-    let users = JSON.parse(localStorage.getItem('users')) || [];
-    const user: User = users.find(x => x.username === userName );
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    let user: User = users.find(x => x.username === userName );
     if (users.length === 0 || !user) {
       // user not yet in localStorage
-      const user = {
+      user = {
         firstName: userName,
         lastName: userName,
         username: userName,
@@ -48,7 +48,7 @@ export class CreateUserService {
    * Creates default users for test purposes
    * Used only in development environment
    */
-  createDefaultUsers() {
+  createDefaultUsers(): void {
     this.checkAndRegisterUser('admin');
     this.checkAndRegisterUser('user');
   }

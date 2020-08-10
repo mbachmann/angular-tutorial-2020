@@ -12,10 +12,10 @@ export class AuctionListDetailComponent implements OnInit {
   @Input() auction: Auction;
   constructor(private router: Router) { }
 
-  onContainerClick() {
+  onContainerClick(): void {
     this.router.navigate(['/auctions/' + this.auction.id]);
   }
-  ngOnInit() {
+  ngOnInit(): void {
   }
 
   getLocalDate(date: Date): string {
@@ -31,7 +31,7 @@ export class AuctionListDetailComponent implements OnInit {
     return amount;
   }
 
-  getCurrencyString (): string {
+  getCurrencyString(): string {
     return CURRENCY_STRING;
   }
 }

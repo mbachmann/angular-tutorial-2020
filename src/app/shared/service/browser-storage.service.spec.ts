@@ -5,7 +5,7 @@ import { BrowserStorageService } from './browser-storage.service';
 describe('BrowserStorageService', () => {
   let service: BrowserStorageService;
   beforeEach(() => {
-    TestBed.configureTestingModule({})
+    TestBed.configureTestingModule({});
     service = TestBed.inject(BrowserStorageService);
   });
 

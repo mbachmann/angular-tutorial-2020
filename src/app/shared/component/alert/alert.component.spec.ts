@@ -11,7 +11,7 @@ describe('AlertComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule,],
+      imports: [ RouterTestingModule, ],
       declarations: [ AlertComponent ],
       providers: [
         AlertService,
@@ -30,7 +30,7 @@ describe('AlertComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should write an INFO alert to the component', ()=> {
+  it('should write an INFO alert to the component', () => {
     const alertService: AlertService = TestBed.inject(AlertService);
     alertService.info('INFO');
     fixture.detectChanges();
@@ -41,7 +41,7 @@ describe('AlertComponent', () => {
     expect(fixture.debugElement.query(By.css('.close'))).toBeTruthy();
   });
 
-  it('should write an ERROR alert to the component', ()=> {
+  it('should write an ERROR alert to the component', () => {
     const alertService: AlertService = TestBed.inject(AlertService);
     alertService.error('ERROR');
     fixture.detectChanges();
@@ -52,7 +52,7 @@ describe('AlertComponent', () => {
     expect(fixture.debugElement.query(By.css('.close'))).toBeTruthy();
   });
 
-  it('should write an SUCCESS alert to the component', ()=> {
+  it('should write an SUCCESS alert to the component', () => {
     const alertService: AlertService = TestBed.inject(AlertService);
     alertService.success('SUCCESS');
     fixture.detectChanges();
