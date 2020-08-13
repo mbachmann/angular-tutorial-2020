@@ -6,8 +6,8 @@ import {map, retry} from 'rxjs/operators';
 import {User} from '../model/user';
 import {environment} from '../../../environments/environment';
 import {JwtTokenService} from './jwt-token.service';
-import {Jwt} from '../helper';
 import {BrowserStorageService} from './browser-storage.service';
+import {init} from '../helper/util';
 
 
 @Injectable({providedIn: 'root'})
@@ -24,7 +24,13 @@ export class AuthenticationService {
     private tokenService: JwtTokenService
   ) {
     this.authApiUrl = environment.endpoints.backendAuthUrl;
-    this.currentUserSubject = new BehaviorSubject<User>(JSON.parse(browserStorageService.getItem('currentUser')));
+
+    // Check localstore or sessionstore
+    if (!browserStorageService.getItem('currentUser'))  {
+      browserStorageService.rememberMe = true;
+    }
+    const user: User = init(User, JSON.parse(browserStorageService.getItem('currentUser')));
+    this.currentUserSubject = new BehaviorSubject<User>(user);
     this.currentUser = this.currentUserSubject.asObservable();
   }
 
@@ -45,7 +51,6 @@ export class AuthenticationService {
     return this.http.post<any>(`${this.authApiUrl}/users/authenticate`, data, httpOptions)
       .pipe(
         map(response => {
-        console.log(response);
         const user = response.body;
         if (this.tokenService.verifyToken(user.token, user.publicKey)) {
           this.browserStorageService.rememberMe = rememberMe;
@@ -62,7 +67,7 @@ export class AuthenticationService {
     this.browserStorageService.removeItem('currentUser');
     this.currentUserSubject.next(null);
     this.stopRefreshTokenTimer();
-    // this.router.navigate(['/login']); // is needed after we have a login dialog
+    this.router.navigate(['/login']); // is needed after we have a login dialog
   }
 
   getBasicAuthHeader(username: string, password: string): string {
@@ -96,14 +101,11 @@ export class AuthenticationService {
       }));
   }
 
-
-
   private startRefreshTokenTimer(): void {
 
     // set a timeout to refresh the token a minute before it expires
     const expires = new Date(this.currentUserValue.expires * 1000);
     const timeout = expires.getTime() - Date.now() - (60 * 1000); // debug 59 minutes before (every minute a new token)
-    console.log('timeout=' + timeout, 'expires=' + expires);
     this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
   }
 
@@ -113,20 +115,11 @@ export class AuthenticationService {
 
   private saveUser(user: User): User {
 
-    this.extractTokenInfo(user);
+    user.extractTokenInfo();
     this.browserStorageService.setItem('currentUser', JSON.stringify(user));
     this.currentUserSubject.next(user);
-    console.log(this.currentUserValue.roles, user.roles);
     this.startRefreshTokenTimer();
     return user;
-  }
-
-  public extractTokenInfo(user: User): void {
-    const jwt = this.tokenService.decodeToken(user.token);
-    if (jwt instanceof Jwt) {
-      user.expires = +JSON.stringify(jwt.getExpiration());
-      user.roles = jwt.body['roles'];
-    }
   }
 
 }

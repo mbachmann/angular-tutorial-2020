@@ -1,7 +1,7 @@
 $dark1: #000000;
 $dark2: #212121;
 $dark3: #303030;
-$bg4: #929292;
+$bg4: #f0f0f0;
 
 .row {
   margin: 0.5rem;
@@ -28,4 +28,10 @@ $bg4: #929292;
 
 .boxsh:hover {
   box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24),0 17px 50px 0 rgba(0,0,0,0.19);
+}
+
+.boximage {
+  padding-top: 20px;
+  width: 150px;
+  height: 100px;
 }

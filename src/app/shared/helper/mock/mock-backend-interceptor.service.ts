@@ -12,16 +12,14 @@ import {delay, mergeMap, materialize, dematerialize, tap} from 'rxjs/operators';
 import {AUCTION_DATA} from '../../../auction/shared/auction-data';
 import {
   createMockUser,
-  createRsaJwtToken,
   createTestRefreshToken,
-  createTestToken, createUser, mockAdminData, MockUser, mockUserData, nowEpochSeconds,
+  createTestToken, createUser, mockAdminData, MockUser, mockUserData,
   publicKey,
   verifyRsaJwtToken
 } from './jwt-backend.data';
-import {decodeToken, IJwtStdPayload, Jwt} from '../helper.jwt';
-import {CreateUserService} from '../create-user.service';
-import {UserService} from '../../service/user.service';
+import {decodeToken, Jwt} from '../helper.jwt';
 import {User} from '../../model/user';
+import {nowEpochSeconds} from '../util';
 
 /**
  * The mock backend interceptor is used to simulate a backend. The interceptor allows

@@ -1,0 +1,36 @@
+<div class="col-md-6 offset-md-3 mt-5">
+  <div class="alert alert-info">
+    Username: admin, or user<br />
+    Password:  admin, or user
+  </div>
+  <div class="card">
+    <h4 class="card-header">Angular 10 <br>Auction Case Study</h4>
+    <div class="card-body">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" autocomplete="username" formControlName="username" id="username" class="form-control" [ngClass]="{ 'is-invalid': submitted && loginCtrl.username.errors }" />
+          <div *ngIf="submitted && loginCtrl.username.errors" class="invalid-feedback">
+            <div *ngIf="loginCtrl.username.errors.required">Username is required</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" autocomplete="current-password" formControlName="password" id="password" class="form-control" [ngClass]="{ 'is-invalid': submitted && loginCtrl.password.errors }" />
+          <div *ngIf="submitted && loginCtrl.password.errors" class="invalid-feedback">
+            <div *ngIf="loginCtrl.password.errors.required">Password is required</div>
+          </div>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" name="rememberMe" id="rememberMe" formControlName="rememberMe" class="form-check-input" >
+          <label class="login-checkbox" for="rememberMe">Remember Me</label>
+        </div>
+        <button [disabled]="loading || this.loginForm.invalid" class="btn btn-primary">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+          Login
+        </button>
+        <div *ngIf="error" class="alert alert-danger mt-3 mb-0">{{error}}</div>
+      </form>
+    </div>
+  </div>
+</div>

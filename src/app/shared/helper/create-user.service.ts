@@ -2,6 +2,7 @@ import {first} from 'rxjs/operators';
 import {Injectable} from '@angular/core';
 import {User} from '../model/user';
 import {UserService} from '../service/user.service';
+import {init} from './util';
 
 @Injectable({providedIn: 'root'})
 export class CreateUserService {
@@ -28,7 +29,7 @@ export class CreateUserService {
     let user: User = users.find(x => x.username === userName );
     if (users.length === 0 || !user) {
       // user not yet in localStorage
-      user = {
+      user = init(User, {
         firstName: userName,
         lastName: userName,
         username: userName,
@@ -39,7 +40,7 @@ export class CreateUserService {
         token: null,
         refreshToken: null,
         expires: null
-      };
+      });
       this.registerUser(user);
     }
   }

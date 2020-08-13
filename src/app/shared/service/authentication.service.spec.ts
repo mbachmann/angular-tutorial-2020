@@ -6,7 +6,7 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MockBackendInterceptor } from '../helper/mock/mock-backend-interceptor.service';
 import { CreateUserService } from '../helper/create-user.service';
-import {decodeToken, Jwt, verifyToken} from '../helper';
+import {decodeToken, Jwt, verifyToken} from '../helper/helper.jwt';
 
 describe('AuthenticationService', () => {
   let service: AuthenticationService;
@@ -17,7 +17,8 @@ describe('AuthenticationService', () => {
 
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule,
+        RouterTestingModule.withRoutes([
+          {path: 'login', redirectTo: ''}]),
         HttpClientTestingModule,
 
       ],

@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NavBarComponent } from './nav-bar.component';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {RouterTestingModule} from '@angular/router/testing';
+import {AuthenticationService} from '../shared/service/authentication.service';
 
 describe('NavBarComponent', () => {
   let component: NavBarComponent;
@@ -8,7 +11,15 @@ describe('NavBarComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ NavBarComponent ]
+      imports: [
+        RouterTestingModule.withRoutes([
+          {path: 'login', redirectTo: ''}]),
+        HttpClientTestingModule,
+      ],
+      declarations: [ NavBarComponent ],
+      providers: [
+        AuthenticationService,
+      ]
     })
     .compileComponents();
   }));

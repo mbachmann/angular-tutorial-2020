@@ -1,6 +1,7 @@
 
 import {IJwtHeader, IJwtStdPayload, createToken, verifyToken} from '../helper.jwt';
 import {User} from '../../model/user';
+import {createExpiresDateTime} from '../util';
 
 const issuer  = 'ZHAW';
 const subject  = 'Auction-App';
@@ -89,14 +90,6 @@ export function createTestRefreshToken(username: string): string {
   // return token;
 }
 
-export function nowEpochSeconds(): number {
-  return Math.floor(new Date().getTime() / 1000);
-}
-
-export function createExpiresDateTime(): number {
-  const exp = (nowEpochSeconds() + (60 * 60)) * 1000;
-  return Math.floor(new Date(exp).getTime() / 1000);
-}
 
 export class MockUser {
   id?: number;
