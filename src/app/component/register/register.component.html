@@ -1,0 +1,127 @@
+<div class="col-md-8 offset-md-2 ">
+
+  <div class="card">
+    <h4 class="card-header">Register<br>Auction Case Study</h4>
+    <div class="card-body">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <div class="form-group row">
+          <label for="firstName" class="col-sm-3 col-form-label col-form-label-sm">First Name</label>
+          <div class="col-sm-9">
+            <input type="text" formControlName="firstName" id="firstName" class="form-control form-control-sm"
+                   [ngClass]="{ 'is-invalid': submitted && registerCtrl.firstName.errors }"/>
+            <div *ngIf="(registerCtrl.firstName.touched || submitted)">
+              <span class="text-danger" *ngIf="registerCtrl.firstName.errors?.required"> First Name is required. </span>
+              <span class="text-danger" *ngIf="registerCtrl.firstName.errors?.minlength"> First Name must be at least 2 characters. </span>
+              <span class="text-danger" *ngIf="registerCtrl.firstName.errors?.maxlength"> First Name must be at smaller than 30 characters. </span>
+              <span class="text-danger" *ngIf="registerCtrl.firstName.errors?.cannotContainSpace"> White Spaces are not allowed. </span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="lastName" class="col-sm-3 col-form-label col-form-label-sm">Last Name</label>
+          <div class="col-sm-9">
+            <input type="text" formControlName="lastName" id="lastName" class="form-control form-control-sm"
+                   [ngClass]="{ 'is-invalid': submitted && registerCtrl.lastName.errors }"/>
+            <div *ngIf="(registerCtrl.lastName.touched || submitted)">
+              <span class="text-danger" *ngIf="registerCtrl.lastName.errors?.required"> Last Name is required. </span>
+              <span class="text-danger" *ngIf="registerCtrl.lastName.errors?.minlength"> Last Name must be at least 2 characters. </span>
+              <span class="text-danger" *ngIf="registerCtrl.lastName.errors?.maxlength"> Last Name must be at smaller than 30 characters. </span>
+              <span class="text-danger" *ngIf="registerCtrl.lastName.errors?.cannotContainSpace"> White Spaces are not allowed. </span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="email" class="col-sm-3 col-form-label col-form-label-sm">E-Mail</label>
+          <div class="col-sm-9">
+            <input type="text" autocomplete="email" formControlName="email" id="email"
+                   class="form-control form-control-sm"
+                   [ngClass]="{ 'is-invalid': submitted && registerCtrl.email.errors }"/>
+            <div *ngIf="(registerCtrl.email.touched || submitted)">
+              <span class="text-danger" *ngIf="registerCtrl.email.errors?.required"> E-Mail is required. </span>
+              <span class="text-danger" *ngIf="registerCtrl.email.errors?.cannotContainSpace"> White Spaces are not allowed. </span>
+              <span class="text-danger" *ngIf="registerCtrl.email.errors?.email"> The E-Mail address is not in the correct format. </span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="username" class="col-sm-3 col-form-label col-form-label-sm">Username</label>
+          <div class="col-sm-9">
+            <input type="text" autocomplete="off" formControlName="username" id="username"
+                   class="form-control form-control-sm"
+                   [ngClass]="{ 'is-invalid': submitted && registerCtrl.username.errors }"/>
+            <div *ngIf="(registerCtrl.username.touched || submitted)">
+              <span class="text-danger" *ngIf="registerCtrl.username.errors?.userNameNotAvailable"> User Name is already taken </span>
+              <span class="text-danger" *ngIf="registerCtrl.username.errors?.required"> User Name is required </span>
+              <span class="text-danger" *ngIf="registerCtrl.username.errors?.pattern"> User Name must be between 5 and 15 characters. Allowed characters are a-z, - and _. </span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="password" class="col-sm-3 col-form-label col-form-label-sm">Password</label>
+          <div class="col-sm-9">
+            <div class="input-group">
+              <input [type]="passwordFieldType ? 'text' : 'password'" autocomplete="current-password"
+                     formControlName="password" id="password"
+                     class="form-control form-control-sm"
+                     [ngClass]="{ 'is-invalid': submitted && registerCtrl.password.errors }"/>
+              <div class="input-group-append">
+               <span class="input-group-text">
+                  <i
+                    class="fa"
+                    [ngClass]="{
+                      'fa-eye-slash': !passwordFieldType,
+                      'fa-eye': passwordFieldType
+                    }"
+                    (click)="togglePasswordFieldType()"
+                  ></i>
+               </span>
+              </div>
+            </div>
+            <div *ngIf="(registerCtrl.password.touched || submitted)">
+              <span class="text-danger" *ngIf="registerCtrl.password.errors?.required"> Password is required </span>
+              <span class="text-danger" *ngIf="registerCtrl.password.errors?.invalidPassword"> Password must be between 5 and 50 characters, at least one upper and one lower case letter and at least one number.</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="confirm-password" class="col-sm-3 col-form-label col-form-label-sm">Confirm Password</label>
+          <div class="col-sm-9">
+            <div class="input-group">
+              <input [type]="passwordFieldType ? 'text' : 'password'" autocomplete="confirm-password"
+                     formControlName="confirmPassword"
+                     id="confirm-password"
+                     class="form-control form-control-sm"
+                     [ngClass]="{ 'is-invalid': submitted && registerCtrl.confirmPassword.errors }"/>
+              <div class="input-group-append">
+               <span class="input-group-text">
+                  <i
+                    class="fa"
+                    [ngClass]="{
+                      'fa-eye-slash': !passwordFieldType,
+                      'fa-eye': passwordFieldType
+                    }"
+                    (click)="togglePasswordFieldType()"
+                  ></i>
+               </span>
+              </div>
+            </div>
+            <div *ngIf="(registerCtrl.confirmPassword.touched || submitted)">
+              <span class="text-danger" *ngIf="registerCtrl.confirmPassword.errors?.required"> Confirm Password is required </span>
+              <span class="text-danger" *ngIf="registerCtrl.confirmPassword.errors?.passwordMismatch"> Passwords do not match.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <div class="col-sm-9">
+            <button [disabled]="loading || this.registerForm.invalid" class="btn btn-primary">
+              <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+              Register
+            </button>
+            <a routerLink="../login" class="btn btn-link">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
