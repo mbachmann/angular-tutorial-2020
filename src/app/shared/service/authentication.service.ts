@@ -91,7 +91,7 @@ export class AuthenticationService {
 
     return this.http.post<any>(`$${this.authApiUrl}/users/refresh_token`, data, httpOptions)
       .pipe(map(response => {
-        console.log(response);
+        // console.log(response);
         const user = response.body;
         if (this.tokenService.verifyToken(user.token, user.publicKey)) {
           return this.saveUser(user);

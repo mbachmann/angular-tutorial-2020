@@ -49,7 +49,7 @@ describe('AuthenticationService', () => {
   it('should authenticate an admin', (done) => {
     service.login('admin', 'admin').subscribe(
       (data) => {
-        console.log('authenticateResponse', data, service.currentUserValue);
+        // console.log('authenticateResponse', data, service.currentUserValue);
         expect(service.currentUserValue.username).toBe('admin');
         // use the same service for further tests
         singletonService = service;
@@ -59,7 +59,7 @@ describe('AuthenticationService', () => {
         done();
       },
     (err) => {
-      console.log('authenticateResponse', err);
+      // console.log('authenticateResponse', err);
       fail();
       done();
     }, () => {
@@ -72,7 +72,7 @@ describe('AuthenticationService', () => {
     const oldRefreshToken = singletonService.currentUserValue.refreshToken;
     singletonService.refreshToken().subscribe(
       (data) => {
-        console.log('refreshTokenResponse', data, service.currentUserValue);
+        // console.log('refreshTokenResponse', data, service.currentUserValue);
         expect(singletonService.currentUserValue.username).toBe('admin');
         const newRefreshToken = singletonService.currentUserValue.refreshToken;
         expect(newRefreshToken).not.toEqual(oldRefreshToken);
@@ -82,7 +82,7 @@ describe('AuthenticationService', () => {
         done();
       },
       (err) => {
-        console.log('authenticateResponse', err);
+        // console.log('authenticateResponse', err);
         fail();
         done();
       }, () => {
