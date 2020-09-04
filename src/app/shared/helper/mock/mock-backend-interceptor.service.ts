@@ -5,7 +5,7 @@ import {
   HttpHandler,
   HttpEvent,
   HttpInterceptor,
-  HTTP_INTERCEPTORS, HttpHeaders
+  HTTP_INTERCEPTORS, HttpHeaders, HttpErrorResponse
 } from '@angular/common/http';
 import {Observable, of, throwError} from 'rxjs';
 import {delay, mergeMap, materialize, dematerialize, tap} from 'rxjs/operators';
@@ -20,6 +20,7 @@ import {
 import {decodeToken, Jwt} from '../helper.jwt';
 import {User} from '../../model/user';
 import {nowEpochSeconds} from '../util';
+import {environment} from '../../../../environments/environment';
 
 /**
  * The mock backend interceptor is used to simulate a backend. The interceptor allows
@@ -54,8 +55,13 @@ export class MockBackendInterceptor implements HttpInterceptor {
    */
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const {url, method, headers, body} = request;
+    if (url.startsWith('http') && !url.startsWith(environment.endpoints.backendBaseUrl)) {
+      console.log('call external=' + url);
+      return next.handle(request);
+    }
     // wrap in delayed observable to simulate server api call
     return of(null)
+
       .pipe(mergeMap(() => handleRoute()))
       .pipe(materialize()) // call materialize and dematerialize to ensure delay
       .pipe(delay(100))
@@ -65,9 +71,9 @@ export class MockBackendInterceptor implements HttpInterceptor {
           console.log('mockResponse', data);
         },
         error: err => {
-          console.log('mockResponse', JSON.stringify(err));
+          console.log('mockResponseError', JSON.stringify(err));
         },
-        complete: () => console.log('mockResponse: on complete')
+        // complete: () => console.log('mockResponse: on complete')
       }));
 
     /**
@@ -129,7 +135,6 @@ export class MockBackendInterceptor implements HttpInterceptor {
           // pass through any requests not handled above
           response = next.handle(request);
       }
-      // response.subscribe(data => {console.log('mockResponse', response);})
 
       return response;
     }
@@ -141,7 +146,7 @@ export class MockBackendInterceptor implements HttpInterceptor {
       const mockUsers: Array<MockUser> = JSON.parse(localStorage.getItem(usersKey)) || [];
       const mockUser: MockUser = mockUsers.find(x => x.username === username && x.password === password);
       if (!mockUser) {
-        return notFound('Username or password is incorrect');
+        return unauthorizedMessage('Username or password is incorrect');
       } else {
         mockUser.tokens.push(createTestToken(username));
         mockUser.refreshTokens.push(createTestRefreshToken(username));
@@ -288,28 +293,28 @@ export class MockBackendInterceptor implements HttpInterceptor {
     }
 
     function error(message): Observable<HttpResponse<unknown>> {
-      const resp = new HttpResponse({body: message, headers: headers, status: 404});
-      return of(new HttpResponse(resp));
+      return throwError({ headers: headers, status: 404, statusText: message, error: { message: message } });
     }
 
     function unauthorized(): Observable<HttpResponse<unknown>> {
-      const resp = new HttpResponse({body: 'Unauthorised', headers: headers, status: 401});
-      return of(new HttpResponse(resp));
+      return throwError({ headers: headers, status: 401, statusText: 'Unauthorised', error: { message: 'Unauthorised' } });
     }
 
+    function unauthorizedMessage(message: string): Observable<HttpResponse<unknown>> {
+      return throwError({ headers: headers, status: 401, statusText: message, error: { message: message } });
+    }
+
+
     function expired(): Observable<HttpResponse<unknown>> {
-      const resp = new HttpResponse({body: 'Unauthorised - Token expired', headers: headers, status: 401});
-      return of(new HttpResponse(resp));
+      return throwError({ headers: headers, status: 401, statusText: 'Unauthorised - Token expired', error: { message: 'Unauthorised - Token expired' } });
     }
 
     function notInRole(): Observable<HttpResponse<unknown>> {
-      const resp = new HttpResponse({body: 'Forbidden - not correct role', headers: headers, status: 403});
-      return of(new HttpResponse(resp));
+      return throwError({ headers: headers, status: 403, statusText: 'Forbidden - not correct role', error: { message: 'Forbidden - not correct role' } });
     }
 
     function notFound(message): Observable<HttpResponse<unknown>> {
-      const resp = new HttpResponse({body: message, headers: headers, status: 404});
-      return of(new HttpResponse(resp));
+      return throwError({ headers: headers, status: 404, statusText: message, error: { message: message } });
     }
 
     function noContent(message): Observable<HttpResponse<unknown>> {
@@ -360,7 +365,7 @@ export class MockBackendInterceptor implements HttpInterceptor {
         const token = decodeToken(jwtToken);
         if (token instanceof Jwt && token.body['roles']) {
           const roles: Array<string> = token.body['roles'];
-          console.log('roles', roles, role);
+          // console.log('roles', roles, role);
           if (roles.indexOf(role) > -1) { return true; }
         }
       }
