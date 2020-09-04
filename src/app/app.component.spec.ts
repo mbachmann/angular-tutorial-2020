@@ -2,28 +2,41 @@ import { TestBed, async } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { AppComponent } from './app.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {AppRoutingModule} from './app-routing.module';
 import {HttpClientModule} from '@angular/common/http';
 import {HomeComponent} from './home/home.component';
 import {NavBarComponent} from './nav-bar/nav-bar.component';
+import {AlertModule} from './shared/component/alert/alert.module';
+import {AlertTestComponent} from './shared/component/alert-test/alert-test.component';
+import {AlertService} from './shared/component/alert/alert.service';
+import {BrowserModule} from '@angular/platform-browser';
 
 
 describe('AppComponent', () => {
+  let alertService: AlertService;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule,
+        BrowserModule,
         FormsModule,
         ReactiveFormsModule,
-        AppRoutingModule,
         HttpClientModule,
+        RouterTestingModule.withRoutes([
+          {path: 'login', redirectTo: ''},
+          {path: 'register', redirectTo: ''},
+          ]),
+        AlertModule,
       ],
       declarations: [
         AppComponent,
         HomeComponent,
         NavBarComponent,
+        AlertTestComponent,
       ],
+      providers: [
+        AlertService,
+      ]
     }).compileComponents();
+    alertService = TestBed.inject(AlertService);
   }));
 
   it('should create the app', () => {
